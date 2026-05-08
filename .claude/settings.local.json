@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__figma-desktop__get_screenshot",
+      "Bash(dir \"C:\\\\Users\\\\cristianderson.lima\\\\\" /b 2>/dev/null || ls /c/Users/cristianderson.lima/ 2>/dev/null || echo \"listing failed\")",
+      "PowerShell(@\\(5176, 5177\\) | ForEach-Object { $pid = \\(Get-NetTCPConnection -LocalPort $_ -ErrorAction SilentlyContinue\\).OwningProcess; if \\($pid\\) { Stop-Process -Id $pid -Force; Write-Host \"Killed $_ \\(PID $pid\\)\" } })",
+      "PowerShell(Stop-Process -Id 63680 -Force -ErrorAction SilentlyContinue)",
+      "Read(//c/Users/Cris Lima/1doc-novo/.claude/**)",
+      "Read(//c/Users/**)",
+      "Bash(git init *)",
+      "Bash(git remote *)"
+    ]
+  }
+}
