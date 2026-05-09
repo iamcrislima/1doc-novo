@@ -886,6 +886,110 @@
   background: var(--primary-dark);
 }
 
+/* ── Sector picker / custom searchable select ───────────── */
+.ndm-setor-picker {
+  position: relative;
+}
+
+.ndm-select-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  min-height: 36px;
+  background: var(--bg-white);
+  cursor: text;
+  transition: border-color var(--transition-fast);
+}
+
+.ndm-select-custom:focus-within {
+  border-color: var(--primary-pure);
+  box-shadow: 0 0 0 2px rgba(0, 88, 219, 0.1);
+}
+
+.ndm-setor-drop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-white);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ndm-setor-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+
+.ndm-setor-item:hover {
+  background: var(--primary-light);
+  color: var(--primary-pure);
+}
+
+/* ── Textarea ────────────────────────────────────────────── */
+.ndm-textarea {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: inherit;
+  background: var(--bg-white);
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+}
+
+.ndm-textarea:focus {
+  border-color: var(--primary-pure);
+  box-shadow: 0 0 0 2px rgba(0, 88, 219, 0.1);
+}
+
+.ndm-textarea::placeholder {
+  color: var(--border-dark);
+}
+
+/* ── Info banner (Ciclo de vida) ─────────────────────────── */
+.ndm-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--primary-light);
+  border: 1px solid #dce6f5;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--primary-pure);
+  line-height: 1.5;
+}
+
+.ndm-info-banner i {
+  font-size: 15px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
 /* ── Minimized pill ──────────────────────────────────────── */
 .ndm-minimized {
   position: fixed;
