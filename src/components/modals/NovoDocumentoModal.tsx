@@ -13,7 +13,7 @@ const TIPOS_DOC = [
   "Ofício", "Ofício Manual", "Alvará", "Ouvidoria", "Chamado técnico",
   "Sessão Plenária", "Protocolo", "Análise de Projeto", "Fiscalização",
   "Proc. Administrativo", "Ato oficial", "Entrada de dados", "Parecer",
-  "Matéria Legislativa",
+  "Matéria Legislativa", "Processo judicial",
 ];
 
 const TIPOS_DOCUMENTO_SUB = [
@@ -116,6 +116,36 @@ const ATEND_PRIORITARIO_OPTS = [
   "Obesidade", "Mobilidade reduzida", "Doador de sangue",
 ];
 
+const TIPOS_ADM = [
+  "Contrato", "Licitação", "Convênio", "Processo Disciplinar",
+  "Prestação de Contas", "Dispensa de Licitação", "Outros",
+];
+
+const TIPOS_ATO = [
+  "Portaria", "Decreto", "Resolução", "Instrução Normativa",
+  "Deliberação", "Regulamentação", "Outros",
+];
+
+const CATEGORIAS_ENTRADA = [
+  "Geral", "Tributário", "Ambiental", "Obras",
+  "Social", "Saúde", "Educação", "Outros",
+];
+
+const TIPOS_JUSTICA = [
+  "Civil", "Criminal", "Trabalhista", "Previdenciária",
+  "Tributária", "Federal", "Eleitoral", "Outros",
+];
+
+const TIPOS_MATERIA = [
+  "Projeto de Lei", "Proposta de Emenda", "Decreto Legislativo",
+  "Resolução", "Indicação", "Requerimento", "Moção", "Outros",
+];
+
+const DOCS_ORIGEM = [
+  "Ofício", "Memorando", "Requerimento", "Petição",
+  "Processo", "Contrato", "Outros",
+];
+
 export default function NovoDocumentoModal({ open, onClose }: Props) {
   const [mode, setMode] = useState<ModalMode>("normal");
   const prevMode = useRef<ModalMode>("normal");
@@ -211,6 +241,34 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
   const [fiscalizado, setFiscalizado] = useState("");
   const [fiscalizacaoTipo, setFiscalizacaoTipo] = useState("");
   const [fiscalizacaoPara, setFiscalizacaoPara] = useState("");
+
+  // Proc. Administrativo
+  const [tipoDocAdm, setTipoDocAdm] = useState("");
+
+  // Ato oficial
+  const [atoNumero, setAtoNumero] = useState("");
+  const [atoAno, setAtoAno] = useState(now.getFullYear().toString());
+  const [atoAssunto, setAtoAssunto] = useState("");
+  const [atoTipo, setAtoTipo] = useState("");
+
+  // Entrada de dados
+  const [entradaTitulo, setEntradaTitulo] = useState("");
+  const [entradaCategoria, setEntradaCategoria] = useState("");
+  const [entradaData, setEntradaData] = useState(now.toISOString().split("T")[0]);
+  const [entradaHora, setEntradaHora] = useState(now.toTimeString().slice(0, 5));
+
+  // Processo judicial
+  const [requerido, setRequerido] = useState("");
+  const [processoJudNum, setProcessoJudNum] = useState("");
+  const [tipoJustica, setTipoJustica] = useState("");
+  const [nomeParteAutora, setNomeParteAutora] = useState("");
+  const [numPasta, setNumPasta] = useState("");
+
+  // Matéria Legislativa
+  const [ementa, setEmenta] = useState("");
+  const [tipoMateria, setTipoMateria] = useState("");
+  const [docOrigem, setDocOrigem] = useState("");
+  const [docOrigemNum, setDocOrigemNum] = useState("");
 
   // sections
   const [secoes, setSecoes] = useState({ prazo: false, anexos: false, assinaturas: false });
@@ -317,9 +375,14 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       case "Chamado técnico": return "Abrir chamado";
       case "Ouvidoria": return "Registrar";
       case "Sessão Plenária": return "Salvar";
+      case "Entrada de dados": return "Salvar";
       case "Protocolo":
-      case "Análise de Projeto": return "Protocolar";
-      case "Fiscalização": return "Enviar";
+      case "Análise de Projeto":
+      case "Matéria Legislativa": return "Protocolar";
+      case "Fiscalização":
+      case "Proc. Administrativo":
+      case "Ato oficial":
+      case "Processo judicial": return "Enviar";
       default: return "Postar";
     }
   })();
@@ -1129,6 +1192,216 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
     </>
   );
 
+  const procAdminFields = (
+    <>
+      <div className="ndm-field">
+        <label className="ndm-label">Assunto*</label>
+        <input className="ndm-input" placeholder="Descreva o assunto..." value={assunto} onChange={(e) => setAssunto(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Tipo*</label>
+        <select className="ndm-select" value={tipoDocAdm} onChange={(e) => setTipoDocAdm(e.target.value)}>
+          <option value="">- selecione -</option>
+          {TIPOS_ADM.map(t => <option key={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="ndm-field">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+          <label className="ndm-label" style={{ margin: 0 }}>Para*</label>
+          <div style={{ display: "flex", gap: 14 }}>
+            <button className="ndm-add-btn" style={{ fontSize: 12 }}>Lista de envio</button>
+            {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
+          </div>
+        </div>
+        <select className="ndm-select" value={paraSetorProtocolo} onChange={(e) => setParaSetorProtocolo(e.target.value)}>
+          <option value="">- selecione setor -</option>
+          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
+        </select>
+      </div>
+      {ccPanel}
+      {editorBlock}
+      <div className="ndm-field">
+        <label className="ndm-checkbox-row">
+          <input type="checkbox" checked={acompanhaFisico} onChange={(e) => setAcompanhaFisico(e.target.checked)} />
+          Acompanha documento físico, imprimir folha de rosto
+        </label>
+      </div>
+      {anexosSection}
+      {prazoSection}
+      {assinaturasSection}
+    </>
+  );
+
+  const atoOficialFields = (
+    <>
+      <div className="ndm-row-2">
+        <div className="ndm-field">
+          <label className="ndm-label">Número</label>
+          <input className="ndm-input" placeholder="Número" value={atoNumero} onChange={(e) => setAtoNumero(e.target.value)} />
+        </div>
+        <div className="ndm-field">
+          <label className="ndm-label">Ano</label>
+          <input className="ndm-input" value={atoAno} onChange={(e) => setAtoAno(e.target.value)} />
+        </div>
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Assunto*</label>
+        <input className="ndm-input" placeholder="Descreva o assunto..." value={atoAssunto} onChange={(e) => setAtoAssunto(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Tipo*</label>
+        <select className="ndm-select" value={atoTipo} onChange={(e) => setAtoTipo(e.target.value)}>
+          <option value="">- selecione -</option>
+          {TIPOS_ATO.map(t => <option key={t}>{t}</option>)}
+        </select>
+      </div>
+      {editorBlock}
+      {anexosSection}
+      {prazoSection}
+      {assinaturasSection}
+    </>
+  );
+
+  const entradaDadosFields = (
+    <>
+      <div className="ndm-field">
+        <label className="ndm-label">Título*</label>
+        <input className="ndm-input" placeholder="Informe o título..." value={entradaTitulo} onChange={(e) => setEntradaTitulo(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Categoria*</label>
+        <select className="ndm-select" value={entradaCategoria} onChange={(e) => setEntradaCategoria(e.target.value)}>
+          <option value="">- selecione -</option>
+          {CATEGORIAS_ENTRADA.map(c => <option key={c}>{c}</option>)}
+        </select>
+      </div>
+      <div className="ndm-row-2">
+        <div className="ndm-field">
+          <label className="ndm-label">Data do documento</label>
+          <input className="ndm-input" type="date" value={entradaData} onChange={(e) => setEntradaData(e.target.value)} />
+        </div>
+        <div className="ndm-field">
+          <label className="ndm-label">Hora do documento</label>
+          <input className="ndm-input" type="time" value={entradaHora} onChange={(e) => setEntradaHora(e.target.value)} />
+        </div>
+      </div>
+      {editorBlock}
+      {anexosSection}
+    </>
+  );
+
+  const processoJudicialFields = (
+    <>
+      <div className="ndm-field">
+        <label className="ndm-label">Requerido/Executado</label>
+        <input className="ndm-input" placeholder="Busque existente ou faça cadastro..." value={requerido} onChange={(e) => setRequerido(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Nº do Processo*</label>
+        <input className="ndm-input" placeholder="Ex: 0001234-12.2025.8.26.0001" value={processoJudNum} onChange={(e) => setProcessoJudNum(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Tipo de Justiça*</label>
+        <select className="ndm-select" value={tipoJustica} onChange={(e) => setTipoJustica(e.target.value)}>
+          <option value="">- selecione -</option>
+          {TIPOS_JUSTICA.map(t => <option key={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="ndm-field">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+          <label className="ndm-label" style={{ margin: 0 }}>Para*</label>
+          <div style={{ display: "flex", gap: 14 }}>
+            <button className="ndm-add-btn" style={{ fontSize: 12 }}>Lista de envio</button>
+            {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
+          </div>
+        </div>
+        <select className="ndm-select" value={paraSetorProtocolo} onChange={(e) => setParaSetorProtocolo(e.target.value)}>
+          <option value="">- selecione setor -</option>
+          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
+        </select>
+      </div>
+      {ccPanel}
+      <div className="ndm-field">
+        <label className="ndm-label">Nome da Parte Autora</label>
+        <input className="ndm-input" placeholder="Nome completo..." value={nomeParteAutora} onChange={(e) => setNomeParteAutora(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Nº da Pasta</label>
+        <input className="ndm-input" placeholder="Número identificador da pasta..." value={numPasta} onChange={(e) => setNumPasta(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Atendimento Prioritário</label>
+        <select className="ndm-select" value={atendPrioritario} onChange={(e) => setAtendPrioritario(e.target.value)}>
+          <option value="">- selecione -</option>
+          {ATEND_PRIORITARIO_OPTS.map(a => <option key={a}>{a}</option>)}
+        </select>
+      </div>
+      {editorBlock}
+      <div className="ndm-field">
+        <label className="ndm-checkbox-row">
+          <input type="checkbox" checked={acompanhaFisico} onChange={(e) => setAcompanhaFisico(e.target.checked)} />
+          Acompanha documento físico, imprimir folha de rosto
+        </label>
+      </div>
+      {anexosSection}
+      {prazoSection}
+      {assinaturasSection}
+    </>
+  );
+
+  const materiaLegislativaFields = (
+    <>
+      <div className="ndm-field">
+        <label className="ndm-label">Ementa*</label>
+        <input className="ndm-input" placeholder="Descreva a ementa..." value={ementa} onChange={(e) => setEmenta(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Tipo de Matéria*</label>
+        <select className="ndm-select" value={tipoMateria} onChange={(e) => setTipoMateria(e.target.value)}>
+          <option value="">- selecione -</option>
+          {TIPOS_MATERIA.map(t => <option key={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Para*</label>
+        <select className="ndm-select" value={paraSetorProtocolo} onChange={(e) => setParaSetorProtocolo(e.target.value)}>
+          <option value="">- selecione setor -</option>
+          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
+        </select>
+      </div>
+      <div className="ndm-row-2">
+        <div className="ndm-field">
+          <label className="ndm-label">Documento de Origem</label>
+          <select className="ndm-select" value={docOrigem} onChange={(e) => setDocOrigem(e.target.value)}>
+            <option value="">- selecione -</option>
+            {DOCS_ORIGEM.map(d => <option key={d}>{d}</option>)}
+          </select>
+        </div>
+        <div className="ndm-field">
+          <label className="ndm-label">Número</label>
+          <input className="ndm-input" placeholder="Nº do documento de origem" value={docOrigemNum} onChange={(e) => setDocOrigemNum(e.target.value)} />
+        </div>
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Atendimento Prioritário</label>
+        <select className="ndm-select" value={atendPrioritario} onChange={(e) => setAtendPrioritario(e.target.value)}>
+          <option value="">- selecione -</option>
+          {ATEND_PRIORITARIO_OPTS.map(a => <option key={a}>{a}</option>)}
+        </select>
+      </div>
+      {editorBlock}
+      <div className="ndm-field">
+        <label className="ndm-checkbox-row">
+          <input type="checkbox" checked={acompanhaFisico} onChange={(e) => setAcompanhaFisico(e.target.checked)} />
+          Acompanha documento físico, imprimir folha de rosto
+        </label>
+      </div>
+      {anexosSection}
+      {prazoSection}
+      {assinaturasSection}
+    </>
+  );
+
   const getTypeFields = () => {
     switch (tipoDoc) {
       case "Documento": return documentoFields;
@@ -1141,11 +1414,12 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       case "Sessão Plenária": return sessaoPlenariaFields;
       case "Protocolo":
       case "Análise de Projeto":
-      case "Proc. Administrativo":
-      case "Ato oficial":
-      case "Entrada de dados":
-      case "Parecer":
-      case "Matéria Legislativa": return protocoloFields;
+      case "Parecer": return protocoloFields;
+      case "Proc. Administrativo": return procAdminFields;
+      case "Ato oficial": return atoOficialFields;
+      case "Entrada de dados": return entradaDadosFields;
+      case "Processo judicial": return processoJudicialFields;
+      case "Matéria Legislativa": return materiaLegislativaFields;
       case "Fiscalização": return fiscalizacaoFields;
       default: return memorandoFields;
     }
