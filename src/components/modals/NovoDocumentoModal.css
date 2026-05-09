@@ -1094,6 +1094,22 @@
   border: none;
 }
 
+/* ── CC Panel ────────────────────────────────────────────── */
+.ndm-cc-panel {
+  background: var(--bg-subtle, #f7f8fa);
+  border: 1px solid var(--border-light, #e8edf4);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-top: 4px;
+}
+
+.ndm-cc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
 /* ── Minimized pill ──────────────────────────────────────── */
 .ndm-minimized {
   position: fixed;

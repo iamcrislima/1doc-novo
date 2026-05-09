@@ -31,6 +31,19 @@ const MOCK_SETORES = [
   "Obras e Infraestrutura", "Planejamento Urbano", "Transporte e Mobilidade",
 ];
 
+const MOCK_PESSOAS = [
+  "Ana Paula Ferreira", "Beatriz Oliveira", "Carlos Mendes",
+  "Cris Lima", "Fernanda Lima", "Inácio Santos",
+  "João Pedro Alves", "Moacir Silva de Matos Junior",
+  "Roberto Costa", "Samuel Desenvolvedor III",
+];
+
+const MOCK_LISTAS_ENVIO: Record<string, string[]> = {
+  "Lista Administrativa": ["Cris Lima", "Moacir Silva de Matos Junior", "Ana Paula Ferreira"],
+  "Lista Técnica": ["Samuel Desenvolvedor III", "Roberto Costa", "Fernanda Lima"],
+  "Lista Executiva": ["Inácio Santos", "Carlos Mendes", "João Pedro Alves"],
+};
+
 const ALVARA_TIPOS = [
   "Construção", "Demolição", "Funcionamento", "Habite-se",
   "Licença especial", "Publicidade", "Reforma", "Regularização",
@@ -77,6 +90,24 @@ const ASSUNTOS_CHAMADO = [
   "Infraestrutura civil", "Elevadores", "Telefonia", "Outros",
 ];
 
+const ASSUNTOS_PROTOCOLO = [
+  "Requerimento geral", "Licença ambiental", "Certidão negativa",
+  "Alvará de funcionamento", "Habite-se", "Regularização fundiária",
+  "Serviços públicos", "Tributário", "Obras e reformas", "Outros",
+];
+
+const ENTRADA_TIPOS = [
+  "Documento", "Requerimento", "Petição", "Processo",
+  "Recurso", "Solicitação", "Ofício", "Carta",
+];
+
+const SESSAO_TIPOS = ["Ordinária", "Extraordinária", "Solene", "Especial", "Especial de Posse"];
+
+const FISCALIZACAO_TIPOS = [
+  "Ambiental", "Tributária", "Sanitária",
+  "Obras e Edificações", "Posturas Municipais", "Transporte",
+];
+
 const PRIORIDADES = ["Baixa", "Média", "Alta", "Urgente"];
 
 const ATEND_PRIORITARIO_OPTS = [
@@ -94,11 +125,20 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
   const [assunto, setAssunto] = useState("");
   const [urgente, setUrgente] = useState(false);
 
-  // Memorando / Ofício / Ciclo de vida
+  // Para chips (Memorando / Ofício / Ciclo de vida)
   const [paraChips, setParaChips] = useState<string[]>([]);
   const [paraInput, setParaInput] = useState("");
+
+  // CC — oculto por padrão, exibe ao clicar "+ CC"
+  const [showCC, setShowCC] = useState(false);
   const [ccChips, setCcChips] = useState<string[]>([]);
   const [ccInput, setCcInput] = useState("");
+  const [showCcSuggestions, setShowCcSuggestions] = useState(false);
+  const [ccListaSelecionada, setCcListaSelecionada] = useState("");
+  const ccRef = useRef<HTMLDivElement>(null);
+
+  // Aos cuidados — oculto por padrão
+  const [showCuidados, setShowCuidados] = useState(false);
   const [cuidadosChips, setCuidadosChips] = useState<string[]>([]);
   const [cuidadosInput, setCuidadosInput] = useState("");
 
@@ -136,7 +176,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
   const [emitirEm, setEmitirEm] = useState("");
   const [processoSelecionado, setProcessoSelecionado] = useState("");
 
-  // Ouvidoria + Chamado técnico (shared — mutually exclusive)
+  // Ouvidoria + Chamado técnico (shared)
   const [identificacao, setIdentificacao] = useState<"sigilosa" | "sem-sigilo" | "anonima">("sem-sigilo");
   const [solicitante, setSolicitante] = useState("");
   const [assuntoValue, setAssuntoValue] = useState("");
@@ -152,27 +192,38 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
   const [enderecoCompleto, setEnderecoCompleto] = useState("");
   const [numeroRef, setNumeroRef] = useState("");
   const [enderecoConfirmado, setEnderecoConfirmado] = useState("");
-
-  // Chamado técnico
   const [patrimonio, setPatrimonio] = useState("");
+
+  // Sessão Plenária
+  const [sessaoNumero, setSessaoNumero] = useState("");
+  const [sessaoAno, setSessaoAno] = useState(now.getFullYear().toString());
+  const [sessaoTipo, setSessaoTipo] = useState("");
+  const [publicarCentral, setPublicarCentral] = useState(false);
+  const [dataSessao, setDataSessao] = useState(now.toISOString().split("T")[0]);
+  const [horaSessao, setHoraSessao] = useState(now.toTimeString().slice(0, 5));
+
+  // Protocolo / Análise de Projeto
+  const [assuntoProtocolo, setAssuntoProtocolo] = useState("");
+  const [paraSetorProtocolo, setParaSetorProtocolo] = useState("");
+  const [entradaTipo, setEntradaTipo] = useState("");
+
+  // Fiscalização
+  const [fiscalizado, setFiscalizado] = useState("");
+  const [fiscalizacaoTipo, setFiscalizacaoTipo] = useState("");
+  const [fiscalizacaoPara, setFiscalizacaoPara] = useState("");
 
   // sections
   const [secoes, setSecoes] = useState({ prazo: false, anexos: false, assinaturas: false });
   const toggleSecao = (s: keyof typeof secoes) => setSecoes((p) => ({ ...p, [s]: !p[s] }));
 
-  // prazo
   const [prazoTitulo, setPrazoTitulo] = useState("");
   const [prazoData, setPrazoData] = useState("");
   const [prazoHorario, setPrazoHorario] = useState("");
-
-  // assinaturas
   const [assinaturaType, setAssinaturaType] = useState<"eletronica" | "icp">("eletronica");
   const [sequencial, setSequencial] = useState(false);
   const [internos, setInternos] = useState<string[]>([]);
   const [externos, setExternos] = useState<string[]>([]);
   const [assinaturas, setAssinaturas] = useState<{ ordem: string; assinante: string; papel: string; funcao: string }[]>([]);
-
-  // arquivos
   const [arquivos, setArquivos] = useState<{ name: string; size: string; tipo: string }[]>([]);
 
   const onCloseRef = useRef(onClose);
@@ -206,6 +257,9 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       }
       if (assuntoDropRef.current && !assuntoDropRef.current.contains(e.target as Node)) {
         setShowAssuntoDrop(false);
+      }
+      if (ccRef.current && !ccRef.current.contains(e.target as Node)) {
+        setShowCcSuggestions(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -250,6 +304,11 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
   );
   const filteredAssuntos = (tipoDoc === "Ouvidoria" ? ASSUNTOS_OUVIDORIA : ASSUNTOS_CHAMADO)
     .filter(a => a.toLowerCase().includes(assuntoSearch.toLowerCase()));
+  const filteredPessoas = ccInput.trim().length > 0
+    ? MOCK_PESSOAS.filter(p =>
+        p.toLowerCase().includes(ccInput.toLowerCase()) && !ccChips.includes(p)
+      )
+    : [];
 
   // ── Footer label ───────────────────────────────────────────
   const footerLabel = (() => {
@@ -257,9 +316,116 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       case "Alvará": return "Emitir";
       case "Chamado técnico": return "Abrir chamado";
       case "Ouvidoria": return "Registrar";
+      case "Sessão Plenária": return "Salvar";
+      case "Protocolo":
+      case "Análise de Projeto": return "Protocolar";
+      case "Fiscalização": return "Enviar";
       default: return "Postar";
     }
   })();
+
+  // ── Shared: CC panel ───────────────────────────────────────
+  const ccPanel = showCC ? (
+    <div className="ndm-field ndm-cc-panel">
+      <div className="ndm-cc-header">
+        <label className="ndm-label" style={{ margin: 0 }}>Com cópia</label>
+        <button
+          className="ndm-action-btn"
+          style={{ fontSize: 11, color: "var(--danger)" }}
+          onClick={() => { setShowCC(false); setCcChips([]); setCcInput(""); setCcListaSelecionada(""); }}
+        >
+          × Remover CC
+        </button>
+      </div>
+      <select
+        className="ndm-select"
+        style={{ marginBottom: 6 }}
+        value={ccListaSelecionada}
+        onChange={(e) => {
+          const lista = e.target.value;
+          setCcListaSelecionada(lista);
+          if (lista && MOCK_LISTAS_ENVIO[lista]) {
+            const novas = MOCK_LISTAS_ENVIO[lista].filter(p => !ccChips.includes(p));
+            setCcChips(prev => [...prev, ...novas]);
+          }
+        }}
+      >
+        <option value="">Ou selecione uma lista de envio...</option>
+        {Object.keys(MOCK_LISTAS_ENVIO).map(l => <option key={l}>{l}</option>)}
+      </select>
+      <div className="ndm-setor-picker" ref={ccRef}>
+        <div className="ndm-para-row">
+          {ccChips.map((chip, i) => (
+            <span key={i} className="ndm-chip">
+              <i className="fa-regular fa-user" style={{ fontSize: 10 }} />
+              {chip}
+              <button className="ndm-chip-remove" onClick={() => setCcChips(p => p.filter((_, idx) => idx !== i))}>×</button>
+            </span>
+          ))}
+          <input
+            className="ndm-para-input"
+            placeholder={ccChips.length === 0 ? "Buscar pessoa por nome..." : ""}
+            value={ccInput}
+            onChange={(e) => { setCcInput(e.target.value); setShowCcSuggestions(e.target.value.trim().length > 0); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && ccInput.trim() && filteredPessoas.length === 0) {
+                addChip(ccInput, setCcChips, setCcInput);
+                setShowCcSuggestions(false);
+              }
+            }}
+          />
+        </div>
+        {showCcSuggestions && filteredPessoas.length > 0 && (
+          <div className="ndm-setor-drop">
+            {filteredPessoas.map(p => (
+              <button
+                key={p}
+                className="ndm-setor-item"
+                onClick={() => {
+                  setCcChips(prev => [...prev, p]);
+                  setCcInput("");
+                  setShowCcSuggestions(false);
+                }}
+              >
+                <i className="fa-regular fa-user" style={{ fontSize: 12, color: "#0058db" }} />
+                {p}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null;
+
+  const cuidadosPanel = showCuidados ? (
+    <div className="ndm-field ndm-cc-panel">
+      <div className="ndm-cc-header">
+        <label className="ndm-label" style={{ margin: 0 }}>Aos cuidados</label>
+        <button
+          className="ndm-action-btn"
+          style={{ fontSize: 11, color: "var(--danger)" }}
+          onClick={() => { setShowCuidados(false); setCuidadosChips([]); setCuidadosInput(""); }}
+        >
+          × Remover
+        </button>
+      </div>
+      <div className="ndm-para-row">
+        {cuidadosChips.map((chip, i) => (
+          <span key={`cuidados-${i}-${chip}`} className="ndm-chip">
+            {chip}
+            <button className="ndm-chip-remove" onClick={() => setCuidadosChips((p) => p.filter((_, idx) => idx !== i))}>×</button>
+          </span>
+        ))}
+        <input
+          className="ndm-para-input"
+          placeholder={cuidadosChips.length === 0 ? "Nome do responsável..." : ""}
+          value={cuidadosInput}
+          onChange={(e) => setCuidadosInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addChip(cuidadosInput, setCuidadosChips, setCuidadosInput)}
+        />
+      </div>
+    </div>
+  ) : null;
 
   // ── Shared blocks ──────────────────────────────────────────
 
@@ -271,10 +437,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           {setorChips.map((chip, i) => (
             <span key={i} className="ndm-chip">
               {chip}
-              <button
-                className="ndm-chip-remove"
-                onClick={(e) => { e.stopPropagation(); setSetorChips(p => p.filter((_, idx) => idx !== i)); }}
-              >×</button>
+              <button className="ndm-chip-remove" onClick={(e) => { e.stopPropagation(); setSetorChips(p => p.filter((_, idx) => idx !== i)); }}>×</button>
             </span>
           ))}
           <input
@@ -289,17 +452,11 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
         {setorPickerOpen && filteredSetores.length > 0 && (
           <div className="ndm-setor-drop">
             {filteredSetores.map(s => (
-              <button
-                key={s}
-                className="ndm-setor-item"
-                onClick={() => {
-                  if (!setorChips.includes(s)) setSetorChips(p => [...p, s]);
-                  setSetorSearch("");
-                  setSetorPickerOpen(false);
-                }}
-              >
-                <i className="fa-regular fa-building" style={{ fontSize: 12, color: "#0058db" }} />
-                {s}
+              <button key={s} className="ndm-setor-item" onClick={() => {
+                if (!setorChips.includes(s)) setSetorChips(p => [...p, s]);
+                setSetorSearch(""); setSetorPickerOpen(false);
+              }}>
+                <i className="fa-regular fa-building" style={{ fontSize: 12, color: "#0058db" }} />{s}
               </button>
             ))}
           </div>
@@ -325,13 +482,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
         {showAssuntoDrop && (
           <div className="ndm-setor-drop">
             {lista.filter(a => a.toLowerCase().includes(assuntoSearch.toLowerCase())).map(a => (
-              <button
-                key={a}
-                className="ndm-setor-item"
-                onClick={() => { setAssuntoValue(a); setAssuntoSearch(a); setShowAssuntoDrop(false); }}
-              >
-                {a}
-              </button>
+              <button key={a} className="ndm-setor-item" onClick={() => { setAssuntoValue(a); setAssuntoSearch(a); setShowAssuntoDrop(false); }}>{a}</button>
             ))}
           </div>
         )}
@@ -425,24 +576,15 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
             Arquivos permitidos: fotos, documentos, planilhas, apresentações, PDFs e arquivos compactados.<br />
             Limite: até 100 arquivos, máximo de 64 MB cada.
           </p>
-          <button className="ndm-upload-btn">
-            <i className="fa-regular fa-paperclip" /> Anexar arquivo
-          </button>
+          <button className="ndm-upload-btn"><i className="fa-regular fa-paperclip" /> Anexar arquivo</button>
           {arquivos.length > 0 && (
             <div className="ndm-file-list">
               {arquivos.map((f, i) => (
                 <div key={i} className="ndm-file-item">
                   <span className="ndm-file-link">{f.name} ({f.size})</span>
                   <button className="ndm-file-remove" onClick={() => setArquivos((prev) => prev.filter((_, idx) => idx !== i))}>×</button>
-                  <select
-                    className="ndm-file-select-wide"
-                    value={f.tipo}
-                    onChange={(e) => setArquivos((prev) => prev.map((a, idx) => idx === i ? { ...a, tipo: e.target.value } : a))}
-                  >
-                    <option value="">Selecione</option>
-                    <option>Eletrônico</option>
-                    <option>Sigiloso</option>
-                    <option>Público</option>
+                  <select className="ndm-file-select-wide" value={f.tipo} onChange={(e) => setArquivos((prev) => prev.map((a, idx) => idx === i ? { ...a, tipo: e.target.value } : a))}>
+                    <option value="">Selecione</option><option>Eletrônico</option><option>Sigiloso</option><option>Público</option>
                   </select>
                 </div>
               ))}
@@ -466,18 +608,12 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
             <div className="ndm-sig-group-desc">Assine documentos de forma rápida e segura.</div>
             <div className="ndm-sig-radio-row">
               <button className={`ndm-radio-btn ${assinaturaType === "eletronica" ? "ndm-radio-btn--active" : "ndm-radio-btn--inactive"}`} onClick={() => setAssinaturaType("eletronica")}>
-                <span className={`ndm-radio-circle ${assinaturaType === "eletronica" ? "ndm-radio-circle--filled" : ""}`} />
-                Assinatura eletrônica
+                <span className={`ndm-radio-circle ${assinaturaType === "eletronica" ? "ndm-radio-circle--filled" : ""}`} />Assinatura eletrônica
               </button>
               <button className={`ndm-radio-btn ${assinaturaType === "icp" ? "ndm-radio-btn--active" : "ndm-radio-btn--inactive"}`} onClick={() => setAssinaturaType("icp")}>
-                <span className={`ndm-radio-circle ${assinaturaType === "icp" ? "ndm-radio-circle--filled" : ""}`} />
-                Certificado ICP - Brasil
+                <span className={`ndm-radio-circle ${assinaturaType === "icp" ? "ndm-radio-circle--filled" : ""}`} />Certificado ICP - Brasil
               </button>
-              <select className="ndm-sig-mode-select">
-                <option value="">Modo de assinatura</option>
-                <option>Simples</option>
-                <option>Avançado</option>
-              </select>
+              <select className="ndm-sig-mode-select"><option value="">Modo de assinatura</option><option>Simples</option><option>Avançado</option></select>
             </div>
           </div>
           <div className="ndm-sig-divider" />
@@ -493,15 +629,11 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
             </div>
             <div className="ndm-user-group-label">Usuários internos</div>
             <div className="ndm-chip-box" style={{ marginBottom: 10 }}>
-              {internos.map((u, i) => (
-                <span key={i} className="ndm-chip ndm-chip--user">{u}<button className="ndm-chip-remove" onClick={() => setInternos((p) => p.filter((_, idx) => idx !== i))}>×</button></span>
-              ))}
+              {internos.map((u, i) => <span key={i} className="ndm-chip ndm-chip--user">{u}<button className="ndm-chip-remove" onClick={() => setInternos((p) => p.filter((_, idx) => idx !== i))}>×</button></span>)}
             </div>
             <div className="ndm-user-group-label">Contato externo</div>
             <div className="ndm-chip-box" style={{ marginBottom: 10 }}>
-              {externos.map((u, i) => (
-                <span key={i} className="ndm-chip ndm-chip--user">{u}<button className="ndm-chip-remove" onClick={() => setExternos((p) => p.filter((_, idx) => idx !== i))}>×</button></span>
-              ))}
+              {externos.map((u, i) => <span key={i} className="ndm-chip ndm-chip--user">{u}<button className="ndm-chip-remove" onClick={() => setExternos((p) => p.filter((_, idx) => idx !== i))}>×</button></span>)}
             </div>
             <label className="ndm-checkbox-row">
               <input type="checkbox" checked={sequencial} onChange={(e) => setSequencial(e.target.checked)} />
@@ -512,8 +644,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
             <div className="ndm-sig-table-wrap">
               <div className="ndm-sig-table-header">
                 <div style={{ width: 28 }} /><div style={{ width: 60 }}>Ordem</div>
-                <div style={{ flex: 1 }}>Assinante</div>
-                <div style={{ width: 110 }} /><div style={{ width: 110 }}>Função</div><div style={{ width: 36 }} />
+                <div style={{ flex: 1 }}>Assinante</div><div style={{ width: 110 }} /><div style={{ width: 110 }}>Função</div><div style={{ width: 36 }} />
               </div>
               <div className="ndm-sig-rows">
                 {assinaturas.map((row, i) => (
@@ -527,9 +658,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
                     <select className="ndm-table-select" value={row.funcao} onChange={(e) => setAssinaturas((p) => p.map((a, idx) => idx === i ? { ...a, funcao: e.target.value } : a))}>
                       <option>Assinar</option><option>Reconhecer</option><option>Validar</option>
                     </select>
-                    <button className="ndm-del-btn" onClick={() => setAssinaturas((p) => p.filter((_, idx) => idx !== i))}>
-                      <i className="fa-regular fa-trash" />
-                    </button>
+                    <button className="ndm-del-btn" onClick={() => setAssinaturas((p) => p.filter((_, idx) => idx !== i))}><i className="fa-regular fa-trash" /></button>
                   </div>
                 ))}
               </div>
@@ -551,28 +680,12 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
             <span key={`para-${i}-${chip}`} className="ndm-chip">{chip}<button className="ndm-chip-remove" onClick={() => setParaChips((p) => p.filter((_, idx) => idx !== i))}>×</button></span>
           ))}
           <input className="ndm-para-input" placeholder={paraChips.length === 0 ? "Pesquisar setor ou pessoa..." : ""} value={paraInput} onChange={(e) => setParaInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addChip(paraInput, setParaChips, setParaInput)} />
-          <button className="ndm-action-btn">+ CC</button>
-          <button className="ndm-action-btn">Aos cuidados</button>
+          {!showCC && <button className="ndm-action-btn" onClick={() => setShowCC(true)}>+ CC</button>}
+          {!showCuidados && <button className="ndm-action-btn" onClick={() => setShowCuidados(true)}>Aos cuidados</button>}
         </div>
       </div>
-      <div className="ndm-field">
-        <label className="ndm-label">Com cópia</label>
-        <div className="ndm-para-row">
-          {ccChips.map((chip, i) => (
-            <span key={`cc-${i}-${chip}`} className="ndm-chip">{chip}<button className="ndm-chip-remove" onClick={() => setCcChips((p) => p.filter((_, idx) => idx !== i))}>×</button></span>
-          ))}
-          <input className="ndm-para-input" placeholder={ccChips.length === 0 ? "Pesquisar setor ou pessoa..." : ""} value={ccInput} onChange={(e) => setCcInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addChip(ccInput, setCcChips, setCcInput)} />
-        </div>
-      </div>
-      <div className="ndm-field">
-        <label className="ndm-label">Aos cuidados</label>
-        <div className="ndm-para-row">
-          {cuidadosChips.map((chip, i) => (
-            <span key={`cuidados-${i}-${chip}`} className="ndm-chip">{chip}<button className="ndm-chip-remove" onClick={() => setCuidadosChips((p) => p.filter((_, idx) => idx !== i))}>×</button></span>
-          ))}
-          <input className="ndm-para-input" placeholder={cuidadosChips.length === 0 ? "Nome do responsável..." : ""} value={cuidadosInput} onChange={(e) => setCuidadosInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addChip(cuidadosInput, setCuidadosChips, setCuidadosInput)} />
-        </div>
-      </div>
+      {ccPanel}
+      {cuidadosPanel}
       <div className="ndm-field">
         <label className="ndm-label">Assunto*</label>
         <input className="ndm-input" placeholder="Descreva o assunto do documento..." value={assunto} onChange={(e) => setAssunto(e.target.value)} />
@@ -599,9 +712,10 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           </div>
           {showTipoDocDrop && (
             <div className="ndm-setor-drop">
-              {filteredTiposDoc.length === 0 ? <div style={{ padding: "10px 12px", fontSize: 12, color: "#888" }}>Nenhum tipo encontrado</div> : filteredTiposDoc.map(t => (
-                <button key={t} className="ndm-setor-item" onClick={() => { setTipoDocumento(t); setTipoDocSearch(t); setShowTipoDocDrop(false); }}>{t}</button>
-              ))}
+              {filteredTiposDoc.length === 0
+                ? <div style={{ padding: "10px 12px", fontSize: 12, color: "#888" }}>Nenhum tipo encontrado</div>
+                : filteredTiposDoc.map(t => <button key={t} className="ndm-setor-item" onClick={() => { setTipoDocumento(t); setTipoDocSearch(t); setShowTipoDocDrop(false); }}>{t}</button>)
+              }
             </div>
           )}
         </div>
@@ -731,9 +845,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           <input className="ndm-input" placeholder="Busque existente ou faça cadastro..." value={requerente} onChange={(e) => setRequerente(e.target.value)} />
         </div>
       </div>
-
       {editorBlock}
-
       <div className="ndm-field">
         <label className="ndm-label">Emitir e já mencionar em</label>
         <select className="ndm-select" value={emitirEm} onChange={(e) => { setEmitirEm(e.target.value); setProcessoSelecionado(""); }}>
@@ -741,7 +853,6 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           {ALVARA_CATEGORIAS.map(c => <option key={c}>{c}</option>)}
         </select>
       </div>
-
       {emitirEm && PROCESSOS_POR_CATEGORIA[emitirEm] && (
         <div className="ndm-process-list">
           <div className="ndm-process-list-title">
@@ -750,28 +861,19 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           </div>
           {PROCESSOS_POR_CATEGORIA[emitirEm].map((p, i) => (
             <label key={i} className="ndm-process-item">
-              <input
-                type="radio"
-                name="processo-alvara"
-                value={p.num}
-                checked={processoSelecionado === p.num}
-                onChange={() => setProcessoSelecionado(p.num)}
-                style={{ accentColor: "#0058db" }}
-              />
+              <input type="radio" name="processo-alvara" value={p.num} checked={processoSelecionado === p.num} onChange={() => setProcessoSelecionado(p.num)} style={{ accentColor: "#0058db" }} />
               <span className="ndm-process-num">{p.num}</span>
               <span className="ndm-process-desc">{p.descricao}</span>
             </label>
           ))}
         </div>
       )}
-
       {assinaturasSection}
     </>
   );
 
   const ouvidoriaFields = (
     <>
-      {/* Identificação */}
       <div className="ndm-field">
         <label className="ndm-label">Identificação*</label>
         <div className="ndm-ident-row">
@@ -780,27 +882,17 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
             { val: "sigilosa", label: "Sigilosa", icon: "fa-lock" },
             { val: "anonima", label: "Anônima", icon: "fa-user-secret" },
           ].map(opt => (
-            <button
-              key={opt.val}
-              className={`ndm-ident-btn ${identificacao === opt.val ? "ndm-ident-btn--active" : ""}`}
-              onClick={() => setIdentificacao(opt.val as typeof identificacao)}
-            >
-              <i className={`fa-regular ${opt.icon}`} style={{ fontSize: 13 }} />
-              {opt.label}
+            <button key={opt.val} className={`ndm-ident-btn ${identificacao === opt.val ? "ndm-ident-btn--active" : ""}`} onClick={() => setIdentificacao(opt.val as typeof identificacao)}>
+              <i className={`fa-regular ${opt.icon}`} style={{ fontSize: 13 }} />{opt.label}
             </button>
           ))}
         </div>
       </div>
-
-      {/* Solicitante */}
       <div className="ndm-field">
         <label className="ndm-label">Solicitante*</label>
         <input className="ndm-input" placeholder="Busque existente ou faça cadastro..." value={solicitante} onChange={(e) => setSolicitante(e.target.value)} />
       </div>
-
       {assuntoSearchBlock(ASSUNTOS_OUVIDORIA)}
-
-      {/* Para + links */}
       <div className="ndm-field">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
           <label className="ndm-label" style={{ margin: 0 }}>Para*</label>
@@ -814,8 +906,6 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
         </select>
       </div>
-
-      {/* Prioridade + Atendimento */}
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Prioridade</label>
@@ -831,8 +921,6 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           </select>
         </div>
       </div>
-
-      {/* Data + Hora */}
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Data</label>
@@ -843,36 +931,18 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           <input className="ndm-input" type="time" value={horaOcorrencia} onChange={(e) => setHoraOcorrencia(e.target.value)} />
         </div>
       </div>
-
-      {/* Onde ocorreu */}
       <div className="ndm-field">
         <label className="ndm-label">Onde ocorreu?</label>
         <div className="ndm-row-onde">
           <div className="ndm-field" style={{ flex: 2, margin: 0 }}>
             <label className="ndm-label" style={{ fontWeight: 400 }}>Endereço completo</label>
-            <input
-              className="ndm-input"
-              placeholder="Encontre o endereço..."
-              value={enderecoCompleto}
-              onChange={(e) => setEnderecoCompleto(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && confirmarEndereco()}
-            />
+            <input className="ndm-input" placeholder="Encontre o endereço..." value={enderecoCompleto} onChange={(e) => setEnderecoCompleto(e.target.value)} onKeyDown={(e) => e.key === "Enter" && confirmarEndereco()} />
           </div>
           <div className="ndm-field" style={{ flex: 1, margin: 0 }}>
             <label className="ndm-label" style={{ fontWeight: 400 }}>Nº ou referência</label>
             <div style={{ display: "flex", gap: 6 }}>
-              <input
-                className="ndm-input"
-                placeholder="3651"
-                value={numeroRef}
-                onChange={(e) => setNumeroRef(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && confirmarEndereco()}
-              />
-              <button
-                className="ndm-gerar-btn"
-                style={{ whiteSpace: "nowrap", flexShrink: 0 }}
-                onClick={confirmarEndereco}
-              >
+              <input className="ndm-input" placeholder="3651" value={numeroRef} onChange={(e) => setNumeroRef(e.target.value)} onKeyDown={(e) => e.key === "Enter" && confirmarEndereco()} />
+              <button className="ndm-gerar-btn" style={{ whiteSpace: "nowrap", flexShrink: 0 }} onClick={confirmarEndereco}>
                 <i className="fa-regular fa-location-dot" /> Localizar
               </button>
             </div>
@@ -880,16 +950,10 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
         </div>
         {enderecoConfirmado && (
           <div className="ndm-map-frame">
-            <iframe
-              title="mapa-localizacao"
-              src={`https://maps.google.com/maps?q=${enderecoConfirmado}&output=embed&hl=pt`}
-              allowFullScreen
-              loading="lazy"
-            />
+            <iframe title="mapa-localizacao" src={`https://maps.google.com/maps?q=${enderecoConfirmado}&output=embed&hl=pt`} allowFullScreen loading="lazy" />
           </div>
         )}
       </div>
-
       {editorBlock}
       {anexosSection}
     </>
@@ -897,21 +961,15 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
 
   const chamadoTecnicoFields = (
     <>
-      {/* Solicitante */}
       <div className="ndm-field">
         <label className="ndm-label">Solicitante*</label>
         <input className="ndm-input" placeholder="Busque existente ou faça cadastro..." value={solicitante} onChange={(e) => setSolicitante(e.target.value)} />
       </div>
-
       {assuntoSearchBlock(ASSUNTOS_CHAMADO)}
-
-      {/* Nº Patrimônio */}
       <div className="ndm-field">
         <label className="ndm-label">Nº de Patrimônio</label>
         <input className="ndm-input" placeholder="Caso exista" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)} />
       </div>
-
-      {/* Urgente + Atendimento */}
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Urgência</label>
@@ -928,16 +986,143 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           </select>
         </div>
       </div>
-
       {editorBlock}
-
       <div className="ndm-field">
         <label className="ndm-checkbox-row">
           <input type="checkbox" checked={acompanhaFisico} onChange={(e) => setAcompanhaFisico(e.target.checked)} />
           Acompanha documento físico, imprimir folha de rosto
         </label>
       </div>
+      {anexosSection}
+      {prazoSection}
+      {assinaturasSection}
+    </>
+  );
 
+  const sessaoPlenariaFields = (
+    <>
+      <div className="ndm-row-2">
+        <div className="ndm-field">
+          <label className="ndm-label">Número</label>
+          <input className="ndm-input" placeholder="Número" value={sessaoNumero} onChange={(e) => setSessaoNumero(e.target.value)} />
+        </div>
+        <div className="ndm-field">
+          <label className="ndm-label">Ano</label>
+          <input className="ndm-input" value={sessaoAno} onChange={(e) => setSessaoAno(e.target.value)} />
+        </div>
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Tipo*</label>
+        <select className="ndm-select" value={sessaoTipo} onChange={(e) => setSessaoTipo(e.target.value)}>
+          <option value="">- selecione -</option>
+          {SESSAO_TIPOS.map(t => <option key={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-checkbox-row">
+          <input type="checkbox" checked={publicarCentral} onChange={(e) => setPublicarCentral(e.target.checked)} />
+          Publicar em Central de Atendimento
+        </label>
+      </div>
+      <div className="ndm-row-2">
+        <div className="ndm-field">
+          <label className="ndm-label">Data da sessão</label>
+          <input className="ndm-input" type="date" value={dataSessao} onChange={(e) => setDataSessao(e.target.value)} />
+        </div>
+        <div className="ndm-field">
+          <label className="ndm-label">Hora da sessão</label>
+          <input className="ndm-input" type="time" value={horaSessao} onChange={(e) => setHoraSessao(e.target.value)} />
+        </div>
+      </div>
+      {editorBlock}
+      {anexosSection}
+      {prazoSection}
+      {assinaturasSection}
+    </>
+  );
+
+  // Protocolo e Análise de Projeto compartilham o mesmo form
+  const protocoloFields = (
+    <>
+      <div className="ndm-field">
+        <label className="ndm-label">Solicitante*</label>
+        <input className="ndm-input" placeholder="Busque existente ou faça cadastro..." value={solicitante} onChange={(e) => setSolicitante(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Assunto*</label>
+        <select className="ndm-select" value={assuntoProtocolo} onChange={(e) => setAssuntoProtocolo(e.target.value)}>
+          <option value="">- selecione -</option>
+          {ASSUNTOS_PROTOCOLO.map(a => <option key={a}>{a}</option>)}
+        </select>
+      </div>
+      <div className="ndm-field">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+          <label className="ndm-label" style={{ margin: 0 }}>Para*</label>
+          <div style={{ display: "flex", gap: 14 }}>
+            <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>Lista de envio</button>
+            {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
+          </div>
+        </div>
+        <select className="ndm-select" value={paraSetorProtocolo} onChange={(e) => setParaSetorProtocolo(e.target.value)}>
+          <option value="">- selecione setor -</option>
+          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
+        </select>
+      </div>
+      {ccPanel}
+      <div className="ndm-field">
+        <label className="ndm-label">Entrada*</label>
+        <select className="ndm-select" value={entradaTipo} onChange={(e) => setEntradaTipo(e.target.value)}>
+          <option value="">- selecione -</option>
+          {ENTRADA_TIPOS.map(t => <option key={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Atendimento Prioritário</label>
+        <select className="ndm-select" value={atendPrioritario} onChange={(e) => setAtendPrioritario(e.target.value)}>
+          <option value="">- selecione -</option>
+          {ATEND_PRIORITARIO_OPTS.map(a => <option key={a}>{a}</option>)}
+        </select>
+      </div>
+      {editorBlock}
+      <div className="ndm-field">
+        <label className="ndm-checkbox-row">
+          <input type="checkbox" checked={acompanhaFisico} onChange={(e) => setAcompanhaFisico(e.target.checked)} />
+          Acompanha documento físico, imprimir folha de rosto
+        </label>
+      </div>
+      {anexosSection}
+      {prazoSection}
+      {assinaturasSection}
+    </>
+  );
+
+  const fiscalizacaoFields = (
+    <>
+      <div className="ndm-field">
+        <label className="ndm-label">Fiscalizado*</label>
+        <input className="ndm-input" placeholder="Busque existente ou faça cadastro..." value={fiscalizado} onChange={(e) => setFiscalizado(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Tipo*</label>
+        <select className="ndm-select" value={fiscalizacaoTipo} onChange={(e) => setFiscalizacaoTipo(e.target.value)}>
+          <option value="">- selecione -</option>
+          {FISCALIZACAO_TIPOS.map(t => <option key={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Para*</label>
+        <select className="ndm-select" value={fiscalizacaoPara} onChange={(e) => setFiscalizacaoPara(e.target.value)}>
+          <option value="">- selecione setor -</option>
+          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
+        </select>
+      </div>
+      {editorBlock}
+      <div className="ndm-field">
+        <label className="ndm-checkbox-row">
+          <input type="checkbox" checked={acompanhaFisico} onChange={(e) => setAcompanhaFisico(e.target.checked)} />
+          Acompanha documento físico, imprimir folha de rosto
+        </label>
+      </div>
       {anexosSection}
       {prazoSection}
       {assinaturasSection}
@@ -953,6 +1138,15 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       case "Alvará": return alvaraFields;
       case "Ouvidoria": return ouvidoriaFields;
       case "Chamado técnico": return chamadoTecnicoFields;
+      case "Sessão Plenária": return sessaoPlenariaFields;
+      case "Protocolo":
+      case "Análise de Projeto":
+      case "Proc. Administrativo":
+      case "Ato oficial":
+      case "Entrada de dados":
+      case "Parecer":
+      case "Matéria Legislativa": return protocoloFields;
+      case "Fiscalização": return fiscalizacaoFields;
       default: return memorandoFields;
     }
   };
@@ -995,7 +1189,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
         <div className="ndm-body">
           <div className="ndm-field">
             <label className="ndm-label">Tipo de documento*</label>
-            <select className="ndm-select" value={tipoDoc} onChange={(e) => setTipoDoc(e.target.value)}>
+            <select className="ndm-select" value={tipoDoc} onChange={(e) => { setTipoDoc(e.target.value); setShowCC(false); setShowCuidados(false); }}>
               {TIPOS_DOC.map((t) => <option key={t}>{t}</option>)}
             </select>
           </div>
