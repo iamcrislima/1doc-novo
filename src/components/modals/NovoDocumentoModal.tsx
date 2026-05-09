@@ -159,6 +159,60 @@ const MOCK_EMPRESAS = [
   "Gráfica Rápida Eireli", "Distribuidora Central S/A",
 ];
 
+// ── Reutilizável: dropdown pesquisável moderno ─────────────
+function SimpleSelect({
+  value, onChange, options, placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div className="ndm-setor-picker" ref={ref}>
+      <div className="ndm-select-custom" onClick={() => { setOpen(true); setSearch(""); }}>
+        <input
+          className="ndm-para-input"
+          placeholder={placeholder ?? "Selecione ou pesquise..."}
+          value={open ? search : value}
+          onChange={(e) => { setSearch(e.target.value); setOpen(true); }}
+          onFocus={() => { setSearch(""); setOpen(true); }}
+          readOnly={!open}
+        />
+        <i className="fa-regular fa-chevron-down" style={{ fontSize: 11, color: open ? "#0058db" : "#94a3b8", flexShrink: 0, transition: "transform 0.15s ease", transform: open ? "rotate(180deg)" : "none" }} />
+      </div>
+      {open && (
+        <div className="ndm-setor-drop">
+          {filtered.length === 0
+            ? <div style={{ padding: "10px 14px", fontSize: 12, color: "#888" }}>Nenhuma opção encontrada</div>
+            : filtered.map(o => (
+              <button key={o} className={`ndm-setor-item${value === o ? " ndm-setor-item--active" : ""}`}
+                onClick={() => { onChange(o); setOpen(false); }}>
+                {value === o && <i className="fa-regular fa-check" style={{ fontSize: 11, color: "#0058db", flexShrink: 0 }} />}
+                {o}
+              </button>
+            ))
+          }
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function NovoDocumentoModal({ open, onClose }: Props) {
   const [mode, setMode] = useState<ModalMode>("normal");
   const prevMode = useRef<ModalMode>("normal");
@@ -1055,10 +1109,12 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       {editorBlock}
       <div className="ndm-field">
         <label className="ndm-label">Emitir e já mencionar em</label>
-        <select className="ndm-select" value={emitirEm} onChange={(e) => { setEmitirEm(e.target.value); setProcessoSelecionado(""); }}>
-          <option value="">- selecione categoria -</option>
-          {ALVARA_CATEGORIAS.map(c => <option key={c}>{c}</option>)}
-        </select>
+        <SimpleSelect
+          value={emitirEm}
+          onChange={(v) => { setEmitirEm(v); setProcessoSelecionado(""); }}
+          options={ALVARA_CATEGORIAS}
+          placeholder="- selecione categoria -"
+        />
       </div>
       {emitirEm && PROCESSOS_POR_CATEGORIA[emitirEm] && (
         <div className="ndm-process-list">
@@ -1099,33 +1155,29 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
         <label className="ndm-label">Solicitante*</label>
         <input className="ndm-input" placeholder="Busque existente ou faça cadastro..." value={solicitante} onChange={(e) => setSolicitante(e.target.value)} />
       </div>
-      {assuntoSearchBlock(ASSUNTOS_OUVIDORIA)}
+      <div className="ndm-field">
+        <label className="ndm-label">Assunto*</label>
+        <SimpleSelect value={assuntoValue} onChange={setAssuntoValue} options={ASSUNTOS_OUVIDORIA} placeholder="Selecione o assunto..." />
+      </div>
       <div className="ndm-field">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
           <label className="ndm-label" style={{ margin: 0 }}>Para*</label>
           <div style={{ display: "flex", gap: 14 }}>
             <button className="ndm-add-btn" style={{ fontSize: 12 }}>Lista de envio</button>
-            <button className="ndm-add-btn" style={{ fontSize: 12 }}>+ CC</button>
+            {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
           </div>
         </div>
-        <select className="ndm-select" value={paraSetorOuv} onChange={(e) => setParaSetorOuv(e.target.value)}>
-          <option value="">- selecione setor -</option>
-          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
-        </select>
+        <SimpleSelect value={paraSetorOuv} onChange={setParaSetorOuv} options={MOCK_SETORES} placeholder="- selecione setor -" />
       </div>
+      {ccPanel}
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Prioridade</label>
-          <select className="ndm-select" value={prioridade} onChange={(e) => setPrioridade(e.target.value)}>
-            {PRIORIDADES.map(p => <option key={p}>{p}</option>)}
-          </select>
+          <SimpleSelect value={prioridade} onChange={setPrioridade} options={PRIORIDADES} placeholder="- selecione -" />
         </div>
         <div className="ndm-field">
           <label className="ndm-label">Atendimento Prioritário</label>
-          <select className="ndm-select" value={atendPrioritario} onChange={(e) => setAtendPrioritario(e.target.value)}>
-            <option value="">- selecione -</option>
-            {ATEND_PRIORITARIO_OPTS.map(a => <option key={a}>{a}</option>)}
-          </select>
+          <SimpleSelect value={atendPrioritario} onChange={setAtendPrioritario} options={ATEND_PRIORITARIO_OPTS} placeholder="- selecione -" />
         </div>
       </div>
       <div className="ndm-row-2">
@@ -1174,25 +1226,18 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
         <label className="ndm-label">Solicitante*</label>
         <input className="ndm-input" placeholder="Busque existente ou faça cadastro..." value={solicitante} onChange={(e) => setSolicitante(e.target.value)} />
       </div>
-      {assuntoSearchBlock(ASSUNTOS_CHAMADO)}
       <div className="ndm-field">
-        <label className="ndm-label">Nº de Patrimônio</label>
-        <input className="ndm-input" placeholder="Caso exista" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)} />
+        <label className="ndm-label">Assunto*</label>
+        <SimpleSelect value={assuntoValue} onChange={setAssuntoValue} options={ASSUNTOS_CHAMADO} placeholder="Selecione o assunto..." />
       </div>
       <div className="ndm-row-2">
         <div className="ndm-field">
-          <label className="ndm-label">Urgência</label>
-          <label className="ndm-checkbox-row" style={{ marginTop: 7 }}>
-            <input type="checkbox" checked={urgente} onChange={(e) => setUrgente(e.target.checked)} />
-            Urgente
-          </label>
+          <label className="ndm-label">Nº de Patrimônio</label>
+          <input className="ndm-input" placeholder="Caso exista" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)} />
         </div>
         <div className="ndm-field">
           <label className="ndm-label">Atendimento Prioritário</label>
-          <select className="ndm-select" value={atendPrioritario} onChange={(e) => setAtendPrioritario(e.target.value)}>
-            <option value="">- selecione -</option>
-            {ATEND_PRIORITARIO_OPTS.map(a => <option key={a}>{a}</option>)}
-          </select>
+          <SimpleSelect value={atendPrioritario} onChange={setAtendPrioritario} options={ATEND_PRIORITARIO_OPTS} placeholder="- selecione -" />
         </div>
       </div>
       {editorBlock}
@@ -1222,10 +1267,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Tipo*</label>
-        <select className="ndm-select" value={sessaoTipo} onChange={(e) => setSessaoTipo(e.target.value)}>
-          <option value="">- selecione -</option>
-          {SESSAO_TIPOS.map(t => <option key={t}>{t}</option>)}
-        </select>
+        <SimpleSelect value={sessaoTipo} onChange={setSessaoTipo} options={SESSAO_TIPOS} placeholder="- selecione -" />
       </div>
       <div className="ndm-field">
         <label className="ndm-checkbox-row">
@@ -1259,38 +1301,28 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Assunto*</label>
-        <select className="ndm-select" value={assuntoProtocolo} onChange={(e) => setAssuntoProtocolo(e.target.value)}>
-          <option value="">- selecione -</option>
-          {ASSUNTOS_PROTOCOLO.map(a => <option key={a}>{a}</option>)}
-        </select>
+        <SimpleSelect value={assuntoProtocolo} onChange={setAssuntoProtocolo} options={ASSUNTOS_PROTOCOLO} placeholder="Selecione ou pesquise o assunto..." />
       </div>
       <div className="ndm-field">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
           <label className="ndm-label" style={{ margin: 0 }}>Para*</label>
           <div style={{ display: "flex", gap: 14 }}>
-            <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>Lista de envio</button>
+            <button className="ndm-add-btn" style={{ fontSize: 12 }}>Lista de envio</button>
             {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
           </div>
         </div>
-        <select className="ndm-select" value={paraSetorProtocolo} onChange={(e) => setParaSetorProtocolo(e.target.value)}>
-          <option value="">- selecione setor -</option>
-          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
-        </select>
+        <SimpleSelect value={paraSetorProtocolo} onChange={setParaSetorProtocolo} options={MOCK_SETORES} placeholder="- selecione setor -" />
       </div>
       {ccPanel}
-      <div className="ndm-field">
-        <label className="ndm-label">Entrada*</label>
-        <select className="ndm-select" value={entradaTipo} onChange={(e) => setEntradaTipo(e.target.value)}>
-          <option value="">- selecione -</option>
-          {ENTRADA_TIPOS.map(t => <option key={t}>{t}</option>)}
-        </select>
-      </div>
-      <div className="ndm-field">
-        <label className="ndm-label">Atendimento Prioritário</label>
-        <select className="ndm-select" value={atendPrioritario} onChange={(e) => setAtendPrioritario(e.target.value)}>
-          <option value="">- selecione -</option>
-          {ATEND_PRIORITARIO_OPTS.map(a => <option key={a}>{a}</option>)}
-        </select>
+      <div className="ndm-row-2">
+        <div className="ndm-field">
+          <label className="ndm-label">Entrada*</label>
+          <SimpleSelect value={entradaTipo} onChange={setEntradaTipo} options={ENTRADA_TIPOS} placeholder="- selecione -" />
+        </div>
+        <div className="ndm-field">
+          <label className="ndm-label">Atendimento Prioritário</label>
+          <SimpleSelect value={atendPrioritario} onChange={setAtendPrioritario} options={ATEND_PRIORITARIO_OPTS} placeholder="- selecione -" />
+        </div>
       </div>
       {editorBlock}
       <div className="ndm-field">
@@ -1313,17 +1345,11 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Tipo*</label>
-        <select className="ndm-select" value={fiscalizacaoTipo} onChange={(e) => setFiscalizacaoTipo(e.target.value)}>
-          <option value="">- selecione -</option>
-          {FISCALIZACAO_TIPOS.map(t => <option key={t}>{t}</option>)}
-        </select>
+        <SimpleSelect value={fiscalizacaoTipo} onChange={setFiscalizacaoTipo} options={FISCALIZACAO_TIPOS} placeholder="- selecione -" />
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Para*</label>
-        <select className="ndm-select" value={fiscalizacaoPara} onChange={(e) => setFiscalizacaoPara(e.target.value)}>
-          <option value="">- selecione setor -</option>
-          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
-        </select>
+        <SimpleSelect value={fiscalizacaoPara} onChange={setFiscalizacaoPara} options={MOCK_SETORES} placeholder="- selecione setor -" />
       </div>
       {editorBlock}
       <div className="ndm-field">
@@ -1346,10 +1372,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Tipo*</label>
-        <select className="ndm-select" value={parecerTipo} onChange={(e) => setParecerTipo(e.target.value)}>
-          <option value="">- selecione -</option>
-          {TIPOS_PARECER.map(t => <option key={t}>{t}</option>)}
-        </select>
+        <SimpleSelect value={parecerTipo} onChange={setParecerTipo} options={TIPOS_PARECER} placeholder="- selecione -" />
       </div>
       {editorBlock}
       {anexosSection}
@@ -1365,10 +1388,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Tipo*</label>
-        <select className="ndm-select" value={tipoDocAdm} onChange={(e) => setTipoDocAdm(e.target.value)}>
-          <option value="">- selecione -</option>
-          {TIPOS_ADM.map(t => <option key={t}>{t}</option>)}
-        </select>
+        <SimpleSelect value={tipoDocAdm} onChange={setTipoDocAdm} options={TIPOS_ADM} placeholder="Selecione ou pesquise o tipo..." />
       </div>
       <div className="ndm-field">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
@@ -1378,10 +1398,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
             {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
           </div>
         </div>
-        <select className="ndm-select" value={paraSetorProtocolo} onChange={(e) => setParaSetorProtocolo(e.target.value)}>
-          <option value="">- selecione setor -</option>
-          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
-        </select>
+        <SimpleSelect value={paraSetorProtocolo} onChange={setParaSetorProtocolo} options={MOCK_SETORES} placeholder="- selecione setor -" />
       </div>
       {ccPanel}
       {editorBlock}
@@ -1415,10 +1432,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Tipo*</label>
-        <select className="ndm-select" value={atoTipo} onChange={(e) => setAtoTipo(e.target.value)}>
-          <option value="">- selecione -</option>
-          {TIPOS_ATO.map(t => <option key={t}>{t}</option>)}
-        </select>
+        <SimpleSelect value={atoTipo} onChange={setAtoTipo} options={TIPOS_ATO} placeholder="Selecione ou pesquise o tipo..." />
       </div>
       {editorBlock}
       {anexosSection}
@@ -1435,10 +1449,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Categoria*</label>
-        <select className="ndm-select" value={entradaCategoria} onChange={(e) => setEntradaCategoria(e.target.value)}>
-          <option value="">- selecione -</option>
-          {CATEGORIAS_ENTRADA.map(c => <option key={c}>{c}</option>)}
-        </select>
+        <SimpleSelect value={entradaCategoria} onChange={setEntradaCategoria} options={CATEGORIAS_ENTRADA} placeholder="- selecione -" />
       </div>
       <div className="ndm-row-2">
         <div className="ndm-field">
@@ -1467,10 +1478,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Tipo de Justiça*</label>
-        <select className="ndm-select" value={tipoJustica} onChange={(e) => setTipoJustica(e.target.value)}>
-          <option value="">- selecione -</option>
-          {TIPOS_JUSTICA.map(t => <option key={t}>{t}</option>)}
-        </select>
+        <SimpleSelect value={tipoJustica} onChange={setTipoJustica} options={TIPOS_JUSTICA} placeholder="- selecione -" />
       </div>
       <div className="ndm-field">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
@@ -1480,26 +1488,22 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
             {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
           </div>
         </div>
-        <select className="ndm-select" value={paraSetorProtocolo} onChange={(e) => setParaSetorProtocolo(e.target.value)}>
-          <option value="">- selecione setor -</option>
-          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
-        </select>
+        <SimpleSelect value={paraSetorProtocolo} onChange={setParaSetorProtocolo} options={MOCK_SETORES} placeholder="- selecione setor -" />
       </div>
       {ccPanel}
       <div className="ndm-field">
         <label className="ndm-label">Nome da Parte Autora</label>
         <input className="ndm-input" placeholder="Nome completo..." value={nomeParteAutora} onChange={(e) => setNomeParteAutora(e.target.value)} />
       </div>
-      <div className="ndm-field">
-        <label className="ndm-label">Nº da Pasta</label>
-        <input className="ndm-input" placeholder="Número identificador da pasta..." value={numPasta} onChange={(e) => setNumPasta(e.target.value)} />
-      </div>
-      <div className="ndm-field">
-        <label className="ndm-label">Atendimento Prioritário</label>
-        <select className="ndm-select" value={atendPrioritario} onChange={(e) => setAtendPrioritario(e.target.value)}>
-          <option value="">- selecione -</option>
-          {ATEND_PRIORITARIO_OPTS.map(a => <option key={a}>{a}</option>)}
-        </select>
+      <div className="ndm-row-2">
+        <div className="ndm-field">
+          <label className="ndm-label">Nº da Pasta</label>
+          <input className="ndm-input" placeholder="Número identificador..." value={numPasta} onChange={(e) => setNumPasta(e.target.value)} />
+        </div>
+        <div className="ndm-field">
+          <label className="ndm-label">Atendimento Prioritário</label>
+          <SimpleSelect value={atendPrioritario} onChange={setAtendPrioritario} options={ATEND_PRIORITARIO_OPTS} placeholder="- selecione -" />
+        </div>
       </div>
       {editorBlock}
       <div className="ndm-field">
@@ -1522,25 +1526,16 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Tipo de Matéria*</label>
-        <select className="ndm-select" value={tipoMateria} onChange={(e) => setTipoMateria(e.target.value)}>
-          <option value="">- selecione -</option>
-          {TIPOS_MATERIA.map(t => <option key={t}>{t}</option>)}
-        </select>
+        <SimpleSelect value={tipoMateria} onChange={setTipoMateria} options={TIPOS_MATERIA} placeholder="- selecione -" />
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Para*</label>
-        <select className="ndm-select" value={paraSetorProtocolo} onChange={(e) => setParaSetorProtocolo(e.target.value)}>
-          <option value="">- selecione setor -</option>
-          {MOCK_SETORES.map(s => <option key={s}>{s}</option>)}
-        </select>
+        <SimpleSelect value={paraSetorProtocolo} onChange={setParaSetorProtocolo} options={MOCK_SETORES} placeholder="- selecione setor -" />
       </div>
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Documento de Origem</label>
-          <select className="ndm-select" value={docOrigem} onChange={(e) => setDocOrigem(e.target.value)}>
-            <option value="">- selecione -</option>
-            {DOCS_ORIGEM.map(d => <option key={d}>{d}</option>)}
-          </select>
+          <SimpleSelect value={docOrigem} onChange={setDocOrigem} options={DOCS_ORIGEM} placeholder="- selecione -" />
         </div>
         <div className="ndm-field">
           <label className="ndm-label">Número</label>
@@ -1549,10 +1544,7 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       <div className="ndm-field">
         <label className="ndm-label">Atendimento Prioritário</label>
-        <select className="ndm-select" value={atendPrioritario} onChange={(e) => setAtendPrioritario(e.target.value)}>
-          <option value="">- selecione -</option>
-          {ATEND_PRIORITARIO_OPTS.map(a => <option key={a}>{a}</option>)}
-        </select>
+        <SimpleSelect value={atendPrioritario} onChange={setAtendPrioritario} options={ATEND_PRIORITARIO_OPTS} placeholder="- selecione -" />
       </div>
       {editorBlock}
       <div className="ndm-field">
@@ -1628,12 +1620,17 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
         <div className="ndm-body">
           <div className="ndm-field">
             <label className="ndm-label">Tipo de documento*</label>
-            <select className="ndm-select" value={tipoDoc} onChange={(e) => { setTipoDoc(e.target.value); setShowCC(false); setShowCuidados(false); }}>
-              {TIPOS_DOC.map((t) => <option key={t}>{t}</option>)}
-            </select>
+            <SimpleSelect
+              value={tipoDoc}
+              onChange={(v) => { setTipoDoc(v); setShowCC(false); setShowCuidados(false); setShowParaSuggestions(false); }}
+              options={TIPOS_DOC}
+              placeholder="Selecione o tipo de documento..."
+            />
           </div>
 
-          {getTypeFields()}
+          <div key={tipoDoc}>
+            {getTypeFields()}
+          </div>
         </div>
 
         {/* ── Footer ── */}
