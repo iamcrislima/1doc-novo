@@ -146,6 +146,19 @@ const DOCS_ORIGEM = [
   "Processo", "Contrato", "Outros",
 ];
 
+const TIPOS_PARECER = [
+  "Jurídico", "Técnico", "Financeiro", "Ambiental", "Contábil", "Outros",
+];
+
+const MOCK_EMPRESAS = [
+  ...["Ana Paula Ferreira", "Beatriz Oliveira", "Carlos Mendes",
+  "Cris Lima", "Fernanda Lima", "Inácio Santos",
+  "João Pedro Alves", "Moacir Silva de Matos Junior",
+  "Roberto Costa", "Samuel Desenvolvedor III"],
+  "Construtora São Paulo Ltda", "TechSolutions ME", "Assessoria Jurídica Mendes",
+  "Gráfica Rápida Eireli", "Distribuidora Central S/A",
+];
+
 export default function NovoDocumentoModal({ open, onClose }: Props) {
   const [mode, setMode] = useState<ModalMode>("normal");
   const prevMode = useRef<ModalMode>("normal");
@@ -270,6 +283,28 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
   const [docOrigem, setDocOrigem] = useState("");
   const [docOrigemNum, setDocOrigemNum] = useState("");
 
+  // Parecer
+  const [parecerTitulo, setParecerTitulo] = useState("");
+  const [parecerTipo, setParecerTipo] = useState("");
+
+  // Para autocomplete (Memorando / Ofício)
+  const [showParaSuggestions, setShowParaSuggestions] = useState(false);
+  const paraDropRef = useRef<HTMLDivElement>(null);
+
+  // Cuidados autocomplete
+  const [showCuidadosSuggestions, setShowCuidadosSuggestions] = useState(false);
+  const cuidadosRef = useRef<HTMLDivElement>(null);
+
+  // Documento — contratado/contratante único com autocomplete
+  const [contratadoContratante, setContratadoContratante] = useState("");
+  const [showContratadoDrop, setShowContratadoDrop] = useState(false);
+  const contratadoRef = useRef<HTMLDivElement>(null);
+
+  // Álvará — tipo com busca
+  const [alvaraTipoSearch, setAlvaraTipoSearch] = useState("");
+  const [showAlvaraTipoDrop, setShowAlvaraTipoDrop] = useState(false);
+  const alvaraTipoRef = useRef<HTMLDivElement>(null);
+
   // sections
   const [secoes, setSecoes] = useState({ prazo: false, anexos: false, assinaturas: false });
   const toggleSecao = (s: keyof typeof secoes) => setSecoes((p) => ({ ...p, [s]: !p[s] }));
@@ -318,6 +353,18 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       }
       if (ccRef.current && !ccRef.current.contains(e.target as Node)) {
         setShowCcSuggestions(false);
+      }
+      if (paraDropRef.current && !paraDropRef.current.contains(e.target as Node)) {
+        setShowParaSuggestions(false);
+      }
+      if (cuidadosRef.current && !cuidadosRef.current.contains(e.target as Node)) {
+        setShowCuidadosSuggestions(false);
+      }
+      if (contratadoRef.current && !contratadoRef.current.contains(e.target as Node)) {
+        setShowContratadoDrop(false);
+      }
+      if (alvaraTipoRef.current && !alvaraTipoRef.current.contains(e.target as Node)) {
+        setShowAlvaraTipoDrop(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -368,6 +415,28 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       )
     : [];
 
+  const filteredParaSetores = paraInput.trim().length > 0
+    ? MOCK_SETORES.filter(s =>
+        s.toLowerCase().includes(paraInput.toLowerCase()) && !paraChips.includes(s)
+      )
+    : [];
+
+  const filteredCuidadosPessoas = cuidadosInput.trim().length > 0
+    ? MOCK_PESSOAS.filter(p =>
+        p.toLowerCase().includes(cuidadosInput.toLowerCase()) && !cuidadosChips.includes(p)
+      )
+    : [];
+
+  const filteredEmpresas = contratadoContratante.trim().length > 0
+    ? MOCK_EMPRESAS.filter(e =>
+        e.toLowerCase().includes(contratadoContratante.toLowerCase())
+      )
+    : [];
+
+  const filteredAlvaraTipos = ALVARA_TIPOS.filter(t =>
+    t.toLowerCase().includes(alvaraTipoSearch.toLowerCase())
+  );
+
   // ── Footer label ───────────────────────────────────────────
   const footerLabel = (() => {
     switch (tipoDoc) {
@@ -375,7 +444,8 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       case "Chamado técnico": return "Abrir chamado";
       case "Ouvidoria": return "Registrar";
       case "Sessão Plenária": return "Salvar";
-      case "Entrada de dados": return "Salvar";
+      case "Entrada de dados":
+      case "Parecer": return "Salvar";
       case "Protocolo":
       case "Análise de Projeto":
       case "Matéria Legislativa": return "Protocolar";
@@ -467,25 +537,38 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
         <button
           className="ndm-action-btn"
           style={{ fontSize: 11, color: "var(--danger)" }}
-          onClick={() => { setShowCuidados(false); setCuidadosChips([]); setCuidadosInput(""); }}
+          onClick={() => { setShowCuidados(false); setCuidadosChips([]); setCuidadosInput(""); setShowCuidadosSuggestions(false); }}
         >
           × Remover
         </button>
       </div>
-      <div className="ndm-para-row">
-        {cuidadosChips.map((chip, i) => (
-          <span key={`cuidados-${i}-${chip}`} className="ndm-chip">
-            {chip}
-            <button className="ndm-chip-remove" onClick={() => setCuidadosChips((p) => p.filter((_, idx) => idx !== i))}>×</button>
-          </span>
-        ))}
-        <input
-          className="ndm-para-input"
-          placeholder={cuidadosChips.length === 0 ? "Nome do responsável..." : ""}
-          value={cuidadosInput}
-          onChange={(e) => setCuidadosInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addChip(cuidadosInput, setCuidadosChips, setCuidadosInput)}
-        />
+      <div className="ndm-setor-picker" ref={cuidadosRef}>
+        <div className="ndm-para-row">
+          {cuidadosChips.map((chip, i) => (
+            <span key={`cuidados-${i}-${chip}`} className="ndm-chip">
+              <i className="fa-regular fa-user" style={{ fontSize: 10 }} />
+              {chip}
+              <button className="ndm-chip-remove" onClick={() => setCuidadosChips((p) => p.filter((_, idx) => idx !== i))}>×</button>
+            </span>
+          ))}
+          <input
+            className="ndm-para-input"
+            placeholder={cuidadosChips.length === 0 ? "Nome do responsável..." : ""}
+            value={cuidadosInput}
+            onChange={(e) => { setCuidadosInput(e.target.value); setShowCuidadosSuggestions(e.target.value.trim().length > 0); }}
+            onKeyDown={(e) => e.key === "Enter" && addChip(cuidadosInput, setCuidadosChips, setCuidadosInput)}
+          />
+        </div>
+        {showCuidadosSuggestions && filteredCuidadosPessoas.length > 0 && (
+          <div className="ndm-setor-drop">
+            {filteredCuidadosPessoas.map(p => (
+              <button key={p} className="ndm-setor-item"
+                onClick={() => { setCuidadosChips(prev => [...prev, p]); setCuidadosInput(""); setShowCuidadosSuggestions(false); }}>
+                <i className="fa-regular fa-user" style={{ fontSize: 12, color: "#0058db" }} />{p}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   ) : null;
@@ -738,13 +821,35 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
     <>
       <div className="ndm-field">
         <label className="ndm-label">Para*</label>
-        <div className="ndm-para-row">
-          {paraChips.map((chip, i) => (
-            <span key={`para-${i}-${chip}`} className="ndm-chip">{chip}<button className="ndm-chip-remove" onClick={() => setParaChips((p) => p.filter((_, idx) => idx !== i))}>×</button></span>
-          ))}
-          <input className="ndm-para-input" placeholder={paraChips.length === 0 ? "Pesquisar setor ou pessoa..." : ""} value={paraInput} onChange={(e) => setParaInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addChip(paraInput, setParaChips, setParaInput)} />
-          {!showCC && <button className="ndm-action-btn" onClick={() => setShowCC(true)}>+ CC</button>}
-          {!showCuidados && <button className="ndm-action-btn" onClick={() => setShowCuidados(true)}>Aos cuidados</button>}
+        <div className="ndm-setor-picker" ref={paraDropRef}>
+          <div className="ndm-para-row">
+            {paraChips.map((chip, i) => (
+              <span key={`para-${i}-${chip}`} className="ndm-chip">
+                <i className="fa-regular fa-building" style={{ fontSize: 10 }} />
+                {chip}
+                <button className="ndm-chip-remove" onClick={() => setParaChips((p) => p.filter((_, idx) => idx !== i))}>×</button>
+              </span>
+            ))}
+            <input
+              className="ndm-para-input"
+              placeholder={paraChips.length === 0 ? "Pesquisar setor..." : ""}
+              value={paraInput}
+              onChange={(e) => { setParaInput(e.target.value); setShowParaSuggestions(e.target.value.trim().length > 0); }}
+              onKeyDown={(e) => { if (e.key === "Enter") { addChip(paraInput, setParaChips, setParaInput); setShowParaSuggestions(false); } }}
+            />
+            {!showCC && <button className="ndm-action-btn" onClick={() => setShowCC(true)}>+ CC</button>}
+            {!showCuidados && <button className="ndm-action-btn" onClick={() => setShowCuidados(true)}>Aos cuidados</button>}
+          </div>
+          {showParaSuggestions && filteredParaSetores.length > 0 && (
+            <div className="ndm-setor-drop">
+              {filteredParaSetores.map(s => (
+                <button key={s} className="ndm-setor-item"
+                  onClick={() => { setParaChips(p => [...p, s]); setParaInput(""); setShowParaSuggestions(false); }}>
+                  <i className="fa-regular fa-building" style={{ fontSize: 12, color: "#0058db" }} />{s}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {ccPanel}
@@ -762,6 +867,13 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
 
   const documentoFields = (
     <>
+      <div style={{ background: "#fff8e6", border: "1px solid #f5c842", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#7a5100", marginBottom: 12, display: "flex", alignItems: "flex-start", gap: 10 }}>
+        <i className="fa-regular fa-circle-info" style={{ color: "#e6a800", marginTop: 1, flexShrink: 0 }} />
+        <span>
+          O documento é indicado para solicitar as assinaturas e fazer o acompanhamento de forma digital tanto de contratos anexados em PDF quanto redigidos diretamente na plataforma no campo de texto.{" "}
+          <a href="#" style={{ color: "#0058db", fontWeight: 600 }} onClick={(e) => e.preventDefault()}>Clique aqui para saber mais!</a>
+        </span>
+      </div>
       <div className="ndm-field">
         <label className="ndm-label">Título*</label>
         <input className="ndm-input" placeholder="Informe o título do documento..." value={titulo} onChange={(e) => setTitulo(e.target.value)} />
@@ -783,14 +895,26 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           )}
         </div>
       </div>
-      <div className="ndm-row-2">
-        <div className="ndm-field">
-          <label className="ndm-label">Contratado</label>
-          <input className="ndm-input" placeholder="Nome ou razão social..." value={contratado} onChange={(e) => setContratado(e.target.value)} />
-        </div>
-        <div className="ndm-field">
-          <label className="ndm-label">Contratante</label>
-          <input className="ndm-input" placeholder="Nome ou razão social..." value={contratante} onChange={(e) => setContratante(e.target.value)} />
+      <div className="ndm-field">
+        <label className="ndm-label">Contratado / Contratante</label>
+        <div className="ndm-setor-picker" ref={contratadoRef}>
+          <input
+            className="ndm-input"
+            placeholder="Busque pelo nome ou razão social..."
+            value={contratadoContratante}
+            onChange={(e) => { setContratadoContratante(e.target.value); setShowContratadoDrop(e.target.value.trim().length > 0); }}
+            onFocus={() => contratadoContratante.trim().length > 0 && setShowContratadoDrop(true)}
+          />
+          {showContratadoDrop && filteredEmpresas.length > 0 && (
+            <div className="ndm-setor-drop">
+              {filteredEmpresas.map(e => (
+                <button key={e} className="ndm-setor-item"
+                  onClick={() => { setContratadoContratante(e); setShowContratadoDrop(false); }}>
+                  <i className="fa-regular fa-user" style={{ fontSize: 12, color: "#0058db" }} />{e}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {editorBlock}
@@ -829,6 +953,8 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
           <textarea className="ndm-textarea" placeholder="Registre os tópicos abordados..." value={topicos} onChange={(e) => setTopicos(e.target.value)} />
         </div>
       </div>
+      {prazoSection}
+      {assinaturasSection}
     </>
   );
 
@@ -898,10 +1024,28 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Tipo*</label>
-          <select className="ndm-select" value={alvaraTipo} onChange={(e) => setAlvaraTipo(e.target.value)}>
-            <option value="">- selecione -</option>
-            {ALVARA_TIPOS.map(t => <option key={t}>{t}</option>)}
-          </select>
+          <div className="ndm-setor-picker" ref={alvaraTipoRef}>
+            <div className="ndm-select-custom" onClick={() => setShowAlvaraTipoDrop(true)}>
+              <input
+                className="ndm-para-input"
+                placeholder="Pesquisar tipo de alvará..."
+                value={showAlvaraTipoDrop ? alvaraTipoSearch : alvaraTipo}
+                onChange={(e) => { setAlvaraTipoSearch(e.target.value); setShowAlvaraTipoDrop(true); }}
+                onFocus={() => { setAlvaraTipoSearch(""); setShowAlvaraTipoDrop(true); }}
+              />
+              <i className="fa-regular fa-chevron-down" style={{ fontSize: 12, color: "#94a3b8", flexShrink: 0 }} />
+            </div>
+            {showAlvaraTipoDrop && (
+              <div className="ndm-setor-drop">
+                {filteredAlvaraTipos.length === 0
+                  ? <div style={{ padding: "10px 12px", fontSize: 12, color: "#888" }}>Nenhum tipo encontrado</div>
+                  : filteredAlvaraTipos.map(t => (
+                    <button key={t} className="ndm-setor-item" onClick={() => { setAlvaraTipo(t); setAlvaraTipoSearch(t); setShowAlvaraTipoDrop(false); }}>{t}</button>
+                  ))
+                }
+              </div>
+            )}
+          </div>
         </div>
         <div className="ndm-field">
           <label className="ndm-label">Requerente*</label>
@@ -1019,6 +1163,8 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       {editorBlock}
       {anexosSection}
+      {prazoSection}
+      {assinaturasSection}
     </>
   );
 
@@ -1188,6 +1334,25 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       </div>
       {anexosSection}
       {prazoSection}
+      {assinaturasSection}
+    </>
+  );
+
+  const parecerFields = (
+    <>
+      <div className="ndm-field">
+        <label className="ndm-label">Título*</label>
+        <input className="ndm-input" placeholder="Informe o título do parecer..." value={parecerTitulo} onChange={(e) => setParecerTitulo(e.target.value)} />
+      </div>
+      <div className="ndm-field">
+        <label className="ndm-label">Tipo*</label>
+        <select className="ndm-select" value={parecerTipo} onChange={(e) => setParecerTipo(e.target.value)}>
+          <option value="">- selecione -</option>
+          {TIPOS_PARECER.map(t => <option key={t}>{t}</option>)}
+        </select>
+      </div>
+      {editorBlock}
+      {anexosSection}
       {assinaturasSection}
     </>
   );
@@ -1412,9 +1577,9 @@ export default function NovoDocumentoModal({ open, onClose }: Props) {
       case "Ouvidoria": return ouvidoriaFields;
       case "Chamado técnico": return chamadoTecnicoFields;
       case "Sessão Plenária": return sessaoPlenariaFields;
+      case "Parecer": return parecerFields;
       case "Protocolo":
-      case "Análise de Projeto":
-      case "Parecer": return protocoloFields;
+      case "Análise de Projeto": return protocoloFields;
       case "Proc. Administrativo": return procAdminFields;
       case "Ato oficial": return atoOficialFields;
       case "Entrada de dados": return entradaDadosFields;
