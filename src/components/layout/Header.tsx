@@ -141,7 +141,19 @@ export default function Header({ onNovoClick }: HeaderProps) {
 
               <div className="onb-header__dropdown-divider" />
               {USER_MENU_ITEMS_2.map((item) => (
-                <div key={item.id} className="onb-header__dropdown-item">{item.label}</div>
+                <div
+                  key={item.id}
+                  className="onb-header__dropdown-item"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (item.id === 'adm') {
+                      navigate('/administrativo');
+                      setOpenMenu(null);
+                    }
+                  }}
+                >
+                  {item.label}
+                </div>
               ))}
 
               <div className="onb-header__dropdown-divider" />

@@ -68,7 +68,7 @@ export default function Subheader({ breadcrumb }: SubheaderProps) {
     <div className="onb-subheader">
       <div className="onb-subheader__left">
         {defaultBreadcrumb.map((item, i) => (
-          <span key={item.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
             {item.to ? (
               <span className="onb-subheader__breadcrumb-link" onClick={() => navigate(item.to!)}>
                 {item.label}

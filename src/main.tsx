@@ -1,11 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-// FontAwesome Pro (renderização SVG via JS)
-import '@fortawesome/fontawesome-pro/js/all.min.js'
-
-// Estilos globais
+// Estilos globais (tokens e variáveis CSS antes de qualquer JS que manipule o DOM)
 import './index.css'
+
+// FontAwesome Pro (renderização SVG via JS — após CSS para evitar FOUC)
+import '@fortawesome/fontawesome-pro/js/all.min.js'
 
 import App from './App.tsx'
 

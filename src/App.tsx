@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-ro
 import Header from './components/layout/Header'
 import Subheader from './components/layout/Subheader'
 import CentralDeAcoes from './pages/CentralDeAcoes'
+import Administrativo from './pages/Administrativo'
 import NovoDocumentoModal from './components/modals/NovoDocumentoModal'
 import './App.css'
 
@@ -29,7 +30,8 @@ function AppLayout({ onNovoClick }: { onNovoClick: () => void }) {
     if (location.pathname === '/comunicacao')return [root, { label: 'Comunicação' }]
     if (location.pathname === '/integracoes')return [root, { label: 'Integrações' }]
     if (location.pathname === '/relatorios') return [root, { label: 'Relatórios' }]
-    if (location.pathname === '/configuracoes') return [root, { label: 'Configurações' }]
+    if (location.pathname === '/configuracoes')    return [root, { label: 'Configurações' }]
+    if (location.pathname.startsWith('/administrativo')) return [root, { label: 'Administrativo' }]
     return [{ label: 'Central de Ações' }]
   })()
 
@@ -48,7 +50,8 @@ function AppLayout({ onNovoClick }: { onNovoClick: () => void }) {
             <Route path="/comunicacao"  element={<PlaceholderPage title="Comunicação" />} />
             <Route path="/integracoes"  element={<PlaceholderPage title="Integrações" />} />
             <Route path="/relatorios"   element={<PlaceholderPage title="Relatórios" />} />
-            <Route path="/configuracoes"element={<PlaceholderPage title="Configurações" />} />
+            <Route path="/configuracoes"    element={<PlaceholderPage title="Configurações" />} />
+            <Route path="/administrativo"  element={<Administrativo />} />
           </Routes>
         </div>
       </div>

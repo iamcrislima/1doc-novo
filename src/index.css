@@ -30,6 +30,10 @@
   --success-light: #e6f9f0;
   --warning: #D97706;
   --warning-light: #FEF3C7;
+  --warning-bg: #fff8e6;
+  --warning-border: #f5c842;
+  --warning-text: #7a5100;
+  --warning-icon: #e6a800;
   --danger: #c0182d;
   --danger-light: #fff0f2;
   --info: #0284C7;
