@@ -8,7 +8,25 @@
       "Read(//c/Users/Cris Lima/1doc-novo/.claude/**)",
       "Read(//c/Users/**)",
       "Bash(git init *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\cristianderson.lima\\\\1doc-novo\\\\.claude\\\\tmp\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\cristianderson.lima\\\\1doc-novo\\\\.claude\\\\tmp\\\\*\" -ErrorAction SilentlyContinue)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\cristianderson.lima\\\\1doc-novo\\\\.claude\\\\tmp\" && echo \"ready\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\cristianderson.lima\\\\1doc-novo\\\\src\" -Recurse -File)",
+      "Bash(Select-Object FullName, Length)",
+      "Bash(Sort-Object Length -Descending)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(cat .npmrc)",
+      "Bash(cat .gitignore)",
+      "Bash(cat .env.example)",
+      "Bash(cat vercel.json)",
+      "Bash(cat > *)"
     ]
   }
 }

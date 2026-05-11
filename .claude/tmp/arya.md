@@ -2,37 +2,32 @@
 
 ## Vulnerabilidades encontradas
 
-🟡 **ALTO** — Token FontAwesome Pro hardcoded no `.npmrc` commitado
-→ Arquivo: `.npmrc` linha 2
-→ Token `B298DC1B-8319-4D67-B499-0396EAD12862` vai para qualquer repositório git, público ou privado
-→ Como corrigir: usar variável de ambiente `FA_TOKEN` e referenciá-la como `//npm.fontawesome.com/:_authToken=${FA_TOKEN}`. O token atual é por design do CLAUDE.md — mas deve ser rotacionado se o repo for público.
-→ OWASP: A02 (Cryptographic Failures / secrets exposure)
+MEDIO — Headers de seguranca ausentes no Vercel → vercel.json nao define CSP, X-Frame-Options, X-Content-Type-Options nem HSTS → adicionar bloco "headers" no vercel.json → [OWASP: A05]
 
-🔵 **BAIXO** — Ausência de `.gitignore`
-→ `node_modules/`, `dist/` e `.env` poderiam ser commitados acidentalmente
-→ Como corrigir: criado `.gitignore` durante esta revisão.
+MEDIO — iframe do Google Maps sem atributo sandbox → OuvidoriaFields.tsx:123 → endereço sanitizado via encodeURIComponent (correto), mas iframe sem sandbox → adicionar sandbox="allow-scripts allow-same-origin" → [OWASP: A05]
 
-## CVEs — dependências analisadas
+BAIXO — Dependencias com ranges ^ em vez de versoes fixas → package.json — fixar versoes em producao ou usar npm ci com package-lock.json commitado
 
-📦 Dependências com vulnerabilidades conhecidas:
-- `react` v19.2.5 → sem CVEs críticos conhecidos na versão atual ✅
-- `react-dom` v19.2.5 → sem CVEs críticos conhecidos ✅
-- `react-router-dom` v7.14.2 → sem CVEs críticos conhecidos ✅
-- `vite` v8.0.10 → sem CVEs críticos conhecidos (versão recente) ✅
-- `typescript` v6.0.2 → sem CVEs ✅
-- `@fortawesome/fontawesome-pro` v7.2.0 → sem CVEs de segurança ✅
+BAIXO — 57 i className fa-* diretos → risco zero no estado atual (todos hardcoded). Risco futuro se nomes vierem de API dinamica.
 
-## Áreas limpas
+## CVEs identificados
 
-✅ `dangerouslySetInnerHTML` — não encontrado no código atual (foi removido por Thanos/refactor anterior).
-✅ `localStorage` / `sessionStorage` — não utilizados. Limpo.
-✅ `console.log` — não encontrado em src/. Limpo.
-✅ Variáveis de ambiente VITE_* — nenhuma exposta no bundle. Limpo.
-✅ Autenticação — projeto é UI pura, sem rotas protegidas ou tokens de sessão.
-✅ Inputs com XSS — sem innerHTML dinâmico. Editor usa contentEditable vazio, sem injeção de conteúdo externo.
-✅ CORS — sem chamadas de API no frontend. Limpo.
+react@19.2.5 — sem CVEs criticos conhecidos
+vite@8.0.10 — versao recente, limpa
+react-router-dom@7.14.2 — limpa
+@fortawesome/fontawesome-pro@7.2.0 — nao indexado em bancos CVE publicos
+typescript@6.0.2 — limpa
+
+## Areas limpas
+
+FA_TOKEN — .npmrc usa ${FA_TOKEN}. Token nao hardcoded. .env no .gitignore. .env.example sem valor real.
+dangerouslySetInnerHTML — zero ocorrencias no projeto.
+Variaveis de ambiente — zero VITE_* no codigo.
+localStorage / sessionStorage — zero usos.
+Dados sensiveis nos mocks — apenas nomes ficticios. Zero CPF, email real, senha.
+console.log — zero em src/.
+Iframe endereco — encodeURIComponent() aplicado antes de montar URL.
 
 ## Mensagem para Aragorn
-Sem vulnerabilidades críticas. Um item alto (token no .npmrc) que é por design do projeto — documentar como risco conhecido. .gitignore foi criado. O código está limpo o suficiente para handoff.
 
-Nota: esta é uma revisão de frontend estático. Se o projeto for conectado a uma API real com dados de usuários, um pentest profissional é necessário antes de ir para produção.
+Zero criticos ou altos. Dois medios (headers Vercel + iframe sandbox) — ambos corrigiveis em minutos. Dois baixos de baixo risco real. Projeto e prototipo frontend sem backend real. Superficie de ataque minima.
