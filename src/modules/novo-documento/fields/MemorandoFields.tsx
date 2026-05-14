@@ -64,6 +64,7 @@ export function MemorandoFields() {
               placeholder={paraChips.length === 0 ? "Pesquisar setor ou pessoa..." : ""}
               value={paraInput}
               onChange={e => { setParaInput(e.target.value); setShowParaSuggestions(e.target.value.trim().length > 0); }}
+              onBlur={() => setTimeout(() => setShowParaSuggestions(false), 150)}
               onKeyDown={e => { if (e.key === "Enter") { addChip(paraInput, setParaChips, setParaInput); setShowParaSuggestions(false); } }}
             />
             {!showCC && <button className="ndm-action-btn" onClick={() => setShowCC(true)}>+ CC</button>}
