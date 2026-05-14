@@ -1,4 +1,5 @@
 import { useState, Fragment } from 'react';
+import { SimpleSelect } from '../../modules/novo-documento/components/SimpleSelect';
 
 /* ── tipos ─────────────────────────────────────────────────────────── */
 interface Setor {
@@ -22,6 +23,50 @@ const MOCK: Setor[] = [
   { id: 'pad',    sigla: 'PAD',    nome: 'PROCESSO ADMINISTRATIVO DISCIPLINAR',tipo: 'Setor', usuarios: 31, parentId: null     },
 ];
 
+/* ── estilos compartilhados dos modais ──────────────────────────────── */
+const OVERLAY: React.CSSProperties = {
+  position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  zIndex: 900, padding: 24,
+};
+const MODAL_BOX: React.CSSProperties = {
+  background: 'white', borderRadius: 8, width: '100%', maxWidth: 780,
+  maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+  boxShadow: '0 24px 64px rgba(0,0,0,0.22)', overflow: 'hidden', zIndex: 901,
+};
+const MODAL_HEADER: React.CSSProperties = {
+  display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+  padding: '18px 22px 14px', borderBottom: '1px solid #ebebeb', flexShrink: 0, gap: 12,
+};
+const MODAL_TITLE: React.CSSProperties = {
+  margin: '0 0 3px', fontSize: 16, fontWeight: 700,
+  color: '#222', fontFamily: 'Open Sans, sans-serif',
+};
+const MODAL_FOOTER: React.CSSProperties = {
+  flexShrink: 0, borderTop: '1px solid #ebebeb',
+  padding: '16px 22px', display: 'flex', justifyContent: 'flex-end', gap: 12,
+};
+const BTN_CANCEL: React.CSSProperties = {
+  height: 38, padding: '0 24px', border: '1px solid #0058db', borderRadius: 6,
+  background: 'white', color: '#0058db', fontSize: 14, fontWeight: 600,
+  cursor: 'pointer', fontFamily: 'Open Sans, sans-serif', minWidth: 120,
+};
+const BTN_SAVE = (enabled: boolean): React.CSSProperties => ({
+  height: 38, padding: '0 24px', border: 'none', borderRadius: 6,
+  background: enabled ? '#0058db' : '#a3a3a3', color: 'white', fontSize: 14,
+  fontWeight: 600, cursor: enabled ? 'pointer' : 'not-allowed',
+  fontFamily: 'Open Sans, sans-serif', minWidth: 120,
+});
+const INP: React.CSSProperties = {
+  width: '100%', height: 40, border: '1px solid #c5c5c5', borderRadius: 6,
+  padding: '0 10px', fontSize: 14, fontFamily: 'Open Sans, sans-serif',
+  color: '#333', outline: 'none', boxSizing: 'border-box', background: 'white',
+};
+const LBL: React.CSSProperties = {
+  display: 'block', fontSize: 13, color: '#333', marginBottom: 5,
+  fontFamily: 'Open Sans, sans-serif', fontWeight: 600,
+};
+
 /* ── SetorModal ─────────────────────────────────────────────────────── */
 const TIPOS = ['Setor', 'Grupo', 'Comissão', 'Departamento', 'Divisão', 'Coordenadoria', 'Diretoria'];
 interface FormData { nome: string; sigla: string; tipo: string; parentId: string; descricao: string; contatos: boolean; docs: boolean }
@@ -36,52 +81,65 @@ function SetorModal({ mode, initial, setores, onSave, onClose }: {
     descricao: '', contatos: false, docs: false,
   });
   const set = (k: keyof FormData) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm(p => ({ ...p, [k]: e.target.value }));
-  const inp: React.CSSProperties = {
-    width: '100%', height: 44, border: '1px solid #a3a3a3', borderRadius: 8,
-    padding: '0 8px', fontSize: 14, fontFamily: 'Open Sans, sans-serif', color: '#333',
-    outline: 'none', boxSizing: 'border-box', background: 'white',
-  };
-  const lbl: React.CSSProperties = { display: 'block', fontSize: 14, color: '#333', marginBottom: 6, fontFamily: 'Open Sans, sans-serif' };
+
+  const setorOptions = ['— raiz —', ...setores.map(s => `${s.sigla} - ${s.nome}`)];
+  const setorValue = form.parentId
+    ? (setores.find(s => s.id === form.parentId)
+        ? `${setores.find(s => s.id === form.parentId)!.sigla} - ${setores.find(s => s.id === form.parentId)!.nome}`
+        : '— raiz —')
+    : '— raiz —';
+
+  const canSave = !!form.nome.trim() && !!form.sigla.trim();
+
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}
-      onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ background: 'white', borderRadius: 8, width: '100%', maxWidth: 780, maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0px 10px 70px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-        <div style={{ padding: '24px 24px 16px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#353535', fontFamily: 'Open Sans, sans-serif' }}>
-            {mode === 'novo' ? 'Novo Setor' : 'Editar Setor'}
-          </h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#888', padding: 4 }}>
+    <div style={OVERLAY} onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={MODAL_BOX}>
+        {/* Header */}
+        <div style={MODAL_HEADER}>
+          <div>
+            <p style={MODAL_TITLE}>{mode === 'novo' ? 'Novo Setor' : 'Editar Setor'}</p>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#888', padding: 4, lineHeight: 1 }}>
             <i className="fa-regular fa-xmark" />
           </button>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 24px' }}>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px 24px' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-            <div style={{ flex: '0 0 430px' }}>
-              <label style={lbl}>Nome do setor<span style={{ color: '#b2132e', marginLeft: 1 }}>*</span></label>
-              <input style={inp} value={form.nome} onChange={set('nome')} />
+            <div style={{ flex: '1 1 340px' }}>
+              <label style={LBL}>Nome do setor<span style={{ color: '#b2132e' }}>*</span></label>
+              <input style={INP} value={form.nome} onChange={set('nome')} />
             </div>
-            <div style={{ flex: '1 0 160px' }}>
-              <label style={lbl}>Sigla do setor<span style={{ color: '#b2132e', marginLeft: 1 }}>*</span></label>
-              <input style={inp} value={form.sigla} onChange={set('sigla')} />
+            <div style={{ flex: '0 0 160px' }}>
+              <label style={LBL}>Sigla do setor<span style={{ color: '#b2132e' }}>*</span></label>
+              <input style={INP} value={form.sigla} onChange={set('sigla')} />
             </div>
-            <div style={{ flex: '0 0 271px' }}>
-              <label style={lbl}>Tipo de setor<span style={{ color: '#b2132e', marginLeft: 1 }}>*</span></label>
-              <select style={{ ...inp, appearance: 'auto' }} value={form.tipo} onChange={set('tipo')}>
-                {TIPOS.map(t => <option key={t}>{t}</option>)}
-              </select>
+            <div style={{ flex: '0 0 240px' }}>
+              <label style={LBL}>Tipo de setor<span style={{ color: '#b2132e' }}>*</span></label>
+              <SimpleSelect value={form.tipo} onChange={v => setForm(p => ({ ...p, tipo: v }))} options={TIPOS} />
             </div>
-            <div style={{ flex: '0 0 430px' }}>
-              <label style={lbl}>Setor Pai</label>
-              <select style={{ ...inp, appearance: 'auto' }} value={form.parentId} onChange={set('parentId')}>
-                <option value="">— raiz —</option>
-                {setores.map(s => <option key={s.id} value={s.id}>{s.sigla} - {s.nome}</option>)}
-              </select>
+            <div style={{ flex: '1 1 280px' }}>
+              <label style={LBL}>Setor Pai{mode === 'edit' && <span style={{ color: '#b2132e' }}>*</span>}</label>
+              <SimpleSelect
+                value={setorValue}
+                onChange={v => {
+                  if (v === '— raiz —') { setForm(p => ({ ...p, parentId: '' })); return; }
+                  const found = setores.find(s => `${s.sigla} - ${s.nome}` === v);
+                  setForm(p => ({ ...p, parentId: found?.id ?? '' }));
+                }}
+                options={setorOptions}
+              />
             </div>
             <div style={{ width: '100%' }}>
-              <label style={{ ...lbl, color: '#565656' }}>Descrição</label>
-              <textarea style={{ ...inp, height: 80, padding: 12, resize: 'vertical' }} value={form.descricao} onChange={set('descricao')} />
+              <label style={{ ...LBL, fontWeight: 400, color: '#565656' }}>Descrição</label>
+              <textarea
+                style={{ ...INP, height: 80, padding: 10, resize: 'vertical' }}
+                value={form.descricao}
+                onChange={set('descricao')}
+              />
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, color: '#333', fontFamily: 'Open Sans, sans-serif' }}>
               <input type="checkbox" checked={form.contatos} onChange={e => setForm(p => ({ ...p, contatos: e.target.checked }))} />
@@ -93,14 +151,73 @@ function SetorModal({ mode, initial, setores, onSave, onClose }: {
             </label>
           </div>
         </div>
-        <div style={{ flexShrink: 0, borderTop: '1px solid #ebebeb', padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-          <button onClick={onClose} style={{ height: 38, padding: '0 24px', border: '1px solid #0058db', borderRadius: 6, background: 'white', color: '#0058db', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'Open Sans, sans-serif', minWidth: 152 }}>
-            Cancelar
+
+        {/* Footer */}
+        <div style={MODAL_FOOTER}>
+          <button onClick={onClose} style={BTN_CANCEL}>Cancelar</button>
+          <button onClick={() => onSave(form)} disabled={!canSave} style={BTN_SAVE(canSave)}>Salvar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── PessoasModal ───────────────────────────────────────────────────── */
+const MOCK_USUARIOS = ['Cris Lima', 'Moacir Silva', 'Marcele Licht', 'Inácio Steffon', 'Carlos Augusto', 'Samuel Rosa', 'Marcos Almeida', 'Roberval Amarantes', 'Cleiton da Silva', 'Márcio Vitor', 'Ana Beatriz', 'Paulo Sergio', 'Fernanda Lima'];
+const TIPO_OPCOES = ['Setor', 'Grupo', 'Comissão'];
+
+function PessoasModal({ setor, onClose }: { setor: Setor; onClose: () => void }) {
+  const [tipo, setTipo] = useState('Setor');
+  const [chips, setChips] = useState<string[]>(['Cris Lima', 'Moacir Silva', 'Marcele Licht', 'Inácio Steffon', 'Carlos Augusto', 'Samuel Rosa', 'Marcos Almeida', 'Roberval Amarantes', 'Cleiton da Silva', 'Márcio Vitor']);
+
+  const disponiveis = MOCK_USUARIOS.filter(u => !chips.includes(u));
+
+  return (
+    <div style={OVERLAY} onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{ ...MODAL_BOX, maxWidth: 540 }}>
+        {/* Header */}
+        <div style={MODAL_HEADER}>
+          <div>
+            <p style={MODAL_TITLE}>Adicionar pessoas ao setor</p>
+            <p style={{ margin: 0, fontSize: 12, color: '#7d7d7d', fontFamily: 'Open Sans, sans-serif' }}>
+              {setor.sigla} — {setor.nome}
+            </p>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#888', padding: 4, lineHeight: 1 }}>
+            <i className="fa-regular fa-xmark" />
           </button>
-          <button onClick={() => onSave(form)} disabled={!form.nome || !form.sigla}
-            style={{ height: 38, padding: '0 24px', border: 'none', borderRadius: 6, background: form.nome && form.sigla ? '#0058db' : '#a3a3a3', color: 'white', fontSize: 14, fontWeight: 600, cursor: form.nome && form.sigla ? 'pointer' : 'not-allowed', fontFamily: 'Open Sans, sans-serif', minWidth: 152 }}>
-            Salvar
-          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px 24px' }}>
+          <label style={LBL}>Selecione os usuários<span style={{ color: '#b2132e' }}>*</span></label>
+          <SimpleSelect
+            value={tipo}
+            onChange={v => { setTipo(v); if (disponiveis.length > 0) setChips(p => [...p, disponiveis[0]]); }}
+            options={TIPO_OPCOES}
+            placeholder="Selecione o perfil..."
+          />
+
+          {/* chips */}
+          <div style={{ marginTop: 12, border: '1px solid #c5c5c5', borderRadius: 6, padding: '8px 10px', minHeight: 80, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {chips.map(u => (
+              <span key={u} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f0f4fb', border: '1px solid #dce6f5', borderRadius: 20, padding: '3px 10px', fontSize: 13, color: '#222', fontFamily: 'Open Sans, sans-serif' }}>
+                {u}
+                <button onClick={() => setChips(p => p.filter(x => x !== u))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', fontSize: 12, padding: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>
+                  <i className="fa-regular fa-xmark" />
+                </button>
+              </span>
+            ))}
+            {chips.length === 0 && (
+              <span style={{ fontSize: 13, color: '#a3a3a3', fontFamily: 'Open Sans, sans-serif' }}>Nenhum usuário selecionado</span>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={MODAL_FOOTER}>
+          <button onClick={onClose} style={BTN_CANCEL}>Cancelar</button>
+          <button onClick={onClose} style={BTN_SAVE(true)}>Salvar edição</button>
         </div>
       </div>
     </div>
@@ -155,6 +272,7 @@ export default function SetoresTab() {
   const [setores, setSetores] = useState<Setor[]>(MOCK);
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['copirn', 'sadm', 'al']));
   const [modal, setModal] = useState<null | { mode: 'novo' | 'edit'; setor?: Setor }>(null);
+  const [pessoasSetor, setPessoasSetor] = useState<Setor | null>(null);
   const [view, setView] = useState<'lista' | 'organograma'>('lista');
 
   const hasChildren = (id: string) => setores.some(s => s.parentId === id);
@@ -348,9 +466,9 @@ export default function SetoresTab() {
                 {/* Ações */}
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button style={actionBtn} title="Editar" onClick={() => setModal({ mode: 'edit', setor: s })}>
-                    <i className="fa-regular fa-pen-to-square" /> Editar
+                    <i className="fa-regular fa-pen-to-square" />
                   </button>
-                  <button style={actionBtn} title="Adicionar pessoas">
+                  <button style={actionBtn} title="Adicionar pessoas" onClick={() => setPessoasSetor(s)}>
                     <i className="fa-regular fa-user-plus" />
                   </button>
                 </div>
@@ -369,7 +487,10 @@ export default function SetoresTab() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modal pessoas */}
+      {pessoasSetor && <PessoasModal setor={pessoasSetor} onClose={() => setPessoasSetor(null)} />}
+
+      {/* Modal setor */}
       {modal && (
         <SetorModal
           mode={modal.mode}
