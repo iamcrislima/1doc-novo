@@ -107,6 +107,13 @@
   white-space: nowrap;
 }
 
+/* ── Justificativa select item selected ─────────────────── */
+.ndm-setor-item--selected {
+  background: #edf2ff;
+  color: #0058db;
+  font-weight: 600;
+}
+
 /* ── Tag next to tipo ───────────────────────────────────── */
 .ndm-tipo-sigilo-tag {
   display: inline-flex; align-items: center; gap: 4px;

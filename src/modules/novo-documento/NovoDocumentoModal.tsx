@@ -62,6 +62,10 @@ export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModal
   onCloseRef.current = onClose;
 
   useEffect(() => {
+    if (open) resetForm();
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (!open) { setMode("normal"); return; }
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape" && mode !== "minimized") onCloseRef.current();

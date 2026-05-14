@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNovoDocumentoCtx } from "../context";
 import { MOCK_PESSOAS_SETORES, MOCK_SETORES } from "../constants";
 import { JUSTIFICATIVAS_SIGILO } from "./constants";
@@ -21,6 +22,82 @@ function abrevSetor(nome: string) {
   return nome.split(" ")
     .filter(w => !["de","da","do","dos","das","e","a","o"].includes(w.toLowerCase()))
     .map(w => w[0]).join("").toUpperCase().slice(0, 5);
+}
+
+function JustificativaSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [dropStyle, setDropStyle] = useState<React.CSSProperties>({});
+
+  const filtered = JUSTIFICATIVAS_SIGILO.filter(j =>
+    search.trim() === "" || j.label.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const openDrop = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setDropStyle({ position: "fixed", top: rect.bottom + 2, left: rect.left, width: rect.width, zIndex: 9999 });
+    }
+    setSearch("");
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      const drop = document.getElementById("ndm-justif-drop");
+      if (!triggerRef.current?.contains(e.target as Node) && !drop?.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const selected = JUSTIFICATIVAS_SIGILO.find(j => j.value === value);
+
+  return (
+    <div ref={triggerRef} className="ndm-select-custom" onClick={openDrop} style={{ cursor: "pointer" }}>
+      <input
+        className="ndm-para-input"
+        readOnly
+        placeholder="Selecione a justificativa..."
+        value={selected ? selected.label : ""}
+        style={{ cursor: "pointer", pointerEvents: "none" }}
+      />
+      <i className="fa-regular fa-chevron-down" style={{ fontSize: 11, color: "#aaa", pointerEvents: "none" }} />
+      {open && createPortal(
+        <div id="ndm-justif-drop" className="ndm-setor-drop" style={dropStyle}>
+          <div style={{ padding: "6px 8px 4px" }}>
+            <input
+              className="ndm-para-input"
+              placeholder="Pesquisar..."
+              value={search}
+              autoFocus
+              onClick={e => e.stopPropagation()}
+              onChange={e => setSearch(e.target.value)}
+              style={{ fontSize: 12 }}
+            />
+          </div>
+          {filtered.map(j => (
+            <button
+              key={j.value}
+              className={`ndm-setor-item${j.value === value ? " ndm-setor-item--selected" : ""}`}
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => { onChange(j.value); setOpen(false); }}
+            >
+              {j.label}
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <div style={{ padding: "10px 12px", fontSize: 13, color: "#aaa" }}>Nenhum resultado</div>
+          )}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
 }
 
 function SetorMultiPicker({ label, obrigatorio = false, chips, onAdd, onRemove, placeholder }: {
@@ -67,7 +144,7 @@ function SetorMultiPicker({ label, obrigatorio = false, chips, onAdd, onRemove, 
             onBlur={() => setTimeout(() => setOpen(false), 150)}
           />
         </div>
-        {open && filtered.length > 0 && (
+        {open && filtered.length > 0 && createPortal(
           <div className="ndm-setor-drop" style={dropStyle}>
             {filtered.map(s => (
               <button key={s} className="ndm-setor-item"
@@ -78,7 +155,8 @@ function SetorMultiPicker({ label, obrigatorio = false, chips, onAdd, onRemove, 
                 {s}
               </button>
             ))}
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
@@ -163,13 +241,18 @@ export function SigiloPanel() {
                   value={pessoaInput}
                   onChange={e => {
                     setPessoaInput(e.target.value);
-                    setShowPessoaDrop(e.target.value.trim().length > 0);
+                    if (e.target.value.trim().length > 0) {
+                      openPessoaDrop();
+                      setShowPessoaDrop(true);
+                    } else {
+                      setShowPessoaDrop(false);
+                    }
                   }}
                   onFocus={openPessoaDrop}
                   onBlur={() => setTimeout(() => setShowPessoaDrop(false), 150)}
                 />
               </div>
-              {showPessoaDrop && filteredPessoas.length > 0 && (
+              {showPessoaDrop && filteredPessoas.length > 0 && createPortal(
                 <div className="ndm-setor-drop" style={pessoaDropStyle}>
                   <div className="ndm-drop-group-label">Clique no setor para adicionar a pessoa</div>
                   {filteredPessoas.map(([nome, setores]) => (
@@ -191,7 +274,8 @@ export function SigiloPanel() {
                       </div>
                     </div>
                   ))}
-                </div>
+                </div>,
+                document.body
               )}
             </div>
           </div>
@@ -199,12 +283,7 @@ export function SigiloPanel() {
           {/* Justificativa legal */}
           <div className="ndm-field" style={{ margin: 0 }}>
             <label className="ndm-label">Justificativa legal*</label>
-            <select className="ndm-select" value={sigilosoJustificativa} onChange={e => setSigilosoJustificativa(e.target.value)}>
-              <option value="">Selecione a justificativa...</option>
-              {JUSTIFICATIVAS_SIGILO.map(j => (
-                <option key={j.value} value={j.value}>{j.label}</option>
-              ))}
-            </select>
+            <JustificativaSelect value={sigilosoJustificativa} onChange={setSigilosoJustificativa} />
           </div>
 
           {/* Prazo */}

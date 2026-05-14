@@ -10,7 +10,7 @@ import { SigiloPanel } from "../sigilo";
 
 export function ProtocoloFields() {
   const {
-    sigiloso,
+    sigiloso, tipoDoc,
     solicitante, setSolicitante,
     assuntoProtocolo, setAssuntoProtocolo,
     paraSetorProtocolo, setParaSetorProtocolo,
@@ -35,8 +35,8 @@ export function ProtocoloFields() {
         <label className="ndm-label">Assunto*</label>
         <SimpleSelect value={assuntoProtocolo} onChange={setAssuntoProtocolo} options={ASSUNTOS_PROTOCOLO} placeholder="Selecione ou pesquise o assunto..." />
       </div>
-      <SigiloPanel />
-      {!sigiloso && (
+      {tipoDoc === "Protocolo" && <SigiloPanel />}
+      {(!sigiloso || tipoDoc !== "Protocolo") && (
         <>
           <div className="ndm-field">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
