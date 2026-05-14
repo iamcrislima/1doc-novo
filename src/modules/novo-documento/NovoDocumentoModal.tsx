@@ -23,6 +23,8 @@ import { MateriaLegislativaFields } from "./fields/MateriaLegislativaFields";
 import { TIPOS_DOC } from "./constants";
 import type { NovoDocumentoModalProps } from "./types";
 
+const TIPOS_COM_SIGILO = ["Proc. Administrativo", "Protocolo"];
+
 export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModalProps) {
   const form = useNovoDocumentoForm();
   const {
@@ -47,6 +49,12 @@ export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModal
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
+
+  // ── Modal de sucesso pós-submit ────────────────────────────
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // ── Confirmação de descarte ────────────────────────────────
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   const prevMode = useRef(mode);
 
@@ -167,7 +175,10 @@ export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModal
   };
 
   // ── Footer handlers ───────────────────────────────────────
-  const handleDiscard = () => {
+  const handleDiscard = () => setShowDiscardConfirm(true);
+
+  const handleDiscardConfirmed = () => {
+    setShowDiscardConfirm(false);
     resetForm();
     onClose();
   };
@@ -185,8 +196,20 @@ export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModal
       return;
     }
     // TODO: integrar com API de criação — POST /api/documentos
-    showToast(`${footerLabel === "Postar" ? "Documento postado" : footerLabel + " realizado"} com sucesso!`);
-    setTimeout(() => { resetForm(); onClose(); }, 1200);
+    setShowSuccess(true);
+  };
+
+  const handleSuccessOk = () => {
+    setShowSuccess(false);
+    resetForm();
+    onClose();
+  };
+
+  const handleSuccessGoToDoc = () => {
+    setShowSuccess(false);
+    resetForm();
+    onClose();
+    // TODO: navegar para o documento criado — onNavigate("inbox") ou rota específica
   };
 
   const getTypeFields = () => {
@@ -225,6 +248,7 @@ export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModal
   }
 
   return (
+    <>
     <NovoDocumentoProvider value={form}>
       {(mode === "normal" || mode === "expanded") && (
         <div className="ndm-overlay" onClick={onClose} />
@@ -273,7 +297,15 @@ export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModal
         {/* ── Body ── */}
         <div className="ndm-body">
           <div className="ndm-field">
-            <label className="ndm-label">Tipo de documento*</label>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <label className="ndm-label" style={{ margin: 0 }}>Tipo de documento*</label>
+              {TIPOS_COM_SIGILO.includes(tipoDoc) && form.sigiloso && (
+                <span className="ndm-tipo-sigilo-tag">
+                  <i className="fa-regular fa-lock" style={{ fontSize: 9 }} />
+                  SIGILOSO
+                </span>
+              )}
+            </div>
             <SimpleSelect
               value={tipoDoc}
               onChange={(v) => {
@@ -281,6 +313,7 @@ export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModal
                 setShowCC(false);
                 setShowCuidados(false);
                 setShowParaSuggestions(false);
+                if (!TIPOS_COM_SIGILO.includes(v)) form.setSigiloso(false);
               }}
               options={TIPOS_DOC}
               placeholder="Selecione o tipo de documento..."
@@ -318,7 +351,60 @@ export default function NovoDocumentoModal({ open, onClose }: NovoDocumentoModal
         </div>
 
       </div>
+
     </NovoDocumentoProvider>
+
+      {/* ── Modal de confirmação de descarte ── */}
+      {showDiscardConfirm && (
+        <>
+          <div className="ndm-success-overlay" onClick={() => setShowDiscardConfirm(false)} />
+          <div className="ndm-success-modal">
+            <div className="ndm-discard-icon">
+              <i className="fa-regular fa-trash-can" />
+            </div>
+            <h3 className="ndm-success-title">Descartar rascunho?</h3>
+            <p className="ndm-success-desc">
+              Todo o conteúdo preenchido será perdido e não poderá ser recuperado.
+              Tem certeza que deseja descartar este rascunho?
+            </p>
+            <div className="ndm-success-actions">
+              <button className="ndm-success-btn-secondary" onClick={() => setShowDiscardConfirm(false)}>
+                Cancelar
+              </button>
+              <button className="ndm-discard-btn-confirm" onClick={handleDiscardConfirmed}>
+                <i className="fa-regular fa-trash-can" /> Descartar
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Modal de sucesso (fora do ndm-modal para evitar containing-block de transform) ── */}
+      {showSuccess && (
+        <>
+          <div className="ndm-success-overlay" />
+          <div className="ndm-success-modal">
+            <div className="ndm-success-icon">
+              <i className="fa-regular fa-circle-check" />
+            </div>
+            <h3 className="ndm-success-title">Documento criado com sucesso!</h3>
+            <p className="ndm-success-desc">
+              Seu documento foi criado e já está disponível na sua{" "}
+              <strong>Caixa de Entrada</strong>. Você pode acessá-lo a qualquer
+              momento para acompanhar o andamento.
+            </p>
+            <div className="ndm-success-actions">
+              <button className="ndm-success-btn-secondary" onClick={handleSuccessOk}>
+                OK
+              </button>
+              <button className="ndm-success-btn-primary" onClick={handleSuccessGoToDoc}>
+                <i className="fa-regular fa-inbox" /> Ir para documento
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
