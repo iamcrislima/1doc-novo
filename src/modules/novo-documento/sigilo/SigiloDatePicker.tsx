@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 const MESES = [
   "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
@@ -113,7 +114,7 @@ export function SigiloDatePicker({ value, onChange, min }: Props) {
         )}
       </div>
 
-      {open && (
+      {open && createPortal(
         <div id="ndm-cal-portal" className="ndm-datepicker-calendar" style={dropStyle}>
           {/* Header */}
           <div className="ndm-cal-header">
@@ -155,7 +156,8 @@ export function SigiloDatePicker({ value, onChange, min }: Props) {
             <button className="ndm-cal-btn-cancel" onClick={() => { setOpen(false); setTemp(value); }}>Cancelar</button>
             <button className="ndm-cal-btn-apply" disabled={!temp} onClick={() => { onChange(temp); setOpen(false); }}>Aplicar</button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
