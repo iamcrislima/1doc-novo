@@ -1,0 +1,303 @@
+/* ── Sigilo Wrap ─────────────────────────────────────────── */
+.ndm-sigilo-wrap {
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md, 8px);
+  overflow: visible;
+  flex-shrink: 0;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ndm-sigilo-wrap--open {
+  border-color: #c06800;
+  box-shadow: 0 0 0 2px rgba(192, 104, 0, 0.1);
+}
+
+/* ── Toggle ─────────────────────────────────────────────── */
+.ndm-sigilo-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-surface-2, #f8f9fb);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans, "Open Sans", sans-serif);
+  text-align: left;
+  border-radius: var(--radius-md, 8px);
+  transition: background 0.12s;
+}
+
+.ndm-sigilo-wrap--open .ndm-sigilo-toggle {
+  border-radius: var(--radius-md, 8px) var(--radius-md, 8px) 0 0;
+  background: #fff7ed;
+}
+
+.ndm-sigilo-toggle:hover { background: #fff7ed; }
+
+.ndm-sigilo-icon {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: #f0f0f0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: #888; flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ndm-sigilo-icon--active { background: #fff0d6; color: #c06800; }
+
+.ndm-sigilo-toggle-label {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-primary, #222);
+  flex: 1;
+}
+
+/* Toggle switch */
+.ndm-sigilo-switch {
+  width: 36px; height: 20px;
+  border-radius: 10px;
+  background: #ddd;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.ndm-sigilo-switch--on { background: #c06800; }
+
+.ndm-sigilo-switch-thumb {
+  position: absolute;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2px; left: 2px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.ndm-sigilo-switch--on .ndm-sigilo-switch-thumb { left: 18px; }
+
+/* ── Body ───────────────────────────────────────────────── */
+.ndm-sigilo-body {
+  padding: 14px 14px 16px;
+  background: #fff;
+  display: flex; flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid #f0e6d2;
+  border-radius: 0 0 var(--radius-md, 8px) var(--radius-md, 8px);
+  overflow: visible;
+}
+
+/* ── Banner ─────────────────────────────────────────────── */
+.ndm-sigilo-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: #fff8ec;
+  border: 1px solid #f5d78a;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 13px; color: #7a4a00; font-weight: 500;
+  font-family: var(--font-sans, "Open Sans", sans-serif);
+}
+
+.ndm-sigilo-banner-tag {
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: #c06800; color: #fff;
+  white-space: nowrap;
+}
+
+/* ── Tag next to tipo ───────────────────────────────────── */
+.ndm-tipo-sigilo-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: #c06800; color: #fff;
+  vertical-align: middle;
+  margin-left: 8px;
+  font-family: var(--font-sans, "Open Sans", sans-serif);
+}
+
+/* ── Person chips ───────────────────────────────────────── */
+.ndm-para-row--pessoas {
+  flex-wrap: wrap;
+  min-height: 40px;
+  padding: 6px 10px;
+  align-items: center;
+}
+
+.ndm-chip--pessoa {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 8px 4px 4px;
+  border: 1.5px solid;
+  border-radius: 100px;
+  background: transparent;
+  font-weight: 400;
+}
+
+.ndm-chip-avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.ndm-chip-pessoa-nome {
+  font-size: 12px; font-weight: 600; color: #222;
+}
+
+.ndm-chip-setor-abrev {
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 100px;
+}
+
+.ndm-pessoa-avatar-sm {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  color: #fff; font-size: 9px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Date Picker input ──────────────────────────────────── */
+.ndm-datepicker-input {
+  display: flex; align-items: center; gap: 8px;
+  height: 36px;
+  border: 1px solid var(--border-medium, #d0d0d0);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0 10px;
+  cursor: pointer;
+  background: var(--bg-white, #fff);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  user-select: none;
+}
+
+.ndm-datepicker-input:hover,
+.ndm-datepicker-input--open {
+  border-color: #0058db;
+}
+
+.ndm-datepicker-input--open {
+  box-shadow: 0 0 0 2px rgba(0, 88, 219, 0.1);
+}
+
+.ndm-datepicker-clear {
+  border: none; background: none;
+  color: #aaa; cursor: pointer;
+  font-size: 16px; padding: 0; line-height: 1;
+  font-family: inherit;
+  transition: color 0.1s;
+}
+
+.ndm-datepicker-clear:hover { color: #555; }
+
+/* ── Calendar popup ─────────────────────────────────────── */
+.ndm-datepicker-calendar {
+  background: #fff;
+  border: 1px solid var(--border-medium, #d0d0d0);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+  overflow: hidden;
+  min-width: 280px;
+  font-family: var(--font-sans, "Open Sans", sans-serif);
+}
+
+.ndm-cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 8px;
+}
+
+.ndm-cal-nav {
+  width: 32px; height: 32px;
+  border-radius: 8px; border: none;
+  background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--text-secondary, #555);
+  font-family: inherit;
+  transition: background 0.12s;
+}
+
+.ndm-cal-nav:hover { background: var(--bg-surface-2, #f4f6f9); color: #0058db; }
+
+.ndm-cal-title {
+  font-size: 15px; font-weight: 700;
+  color: var(--text-primary, #222);
+}
+
+.ndm-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  padding: 4px 12px 8px;
+}
+
+.ndm-cal-day-header {
+  height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  color: var(--text-tertiary, #999);
+}
+
+.ndm-cal-day {
+  height: 34px; width: 100%;
+  border-radius: 8px; border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-primary, #222);
+  font-family: inherit;
+  transition: background 0.1s, color 0.1s;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.ndm-cal-day:hover:not(:disabled):not(.ndm-cal-day--selected) {
+  background: #edf2ff; color: #0058db;
+}
+
+.ndm-cal-day--selected {
+  background: #0058db; color: #fff; font-weight: 700;
+}
+
+.ndm-cal-day--today:not(.ndm-cal-day--selected) {
+  border: 2px solid #0058db; color: #0058db; font-weight: 700;
+}
+
+.ndm-cal-day--outside { color: #ccc; }
+
+.ndm-cal-day--disabled { color: #ddd; cursor: not-allowed; }
+
+.ndm-cal-footer {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-light, #eee);
+}
+
+.ndm-cal-btn-cancel {
+  height: 36px; padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-medium, #d0d0d0);
+  background: #fff; color: var(--text-secondary, #555);
+  font-size: 13px; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+  transition: background 0.12s;
+}
+
+.ndm-cal-btn-cancel:hover { background: var(--bg-surface-2, #f4f6f9); }
+
+.ndm-cal-btn-apply {
+  height: 36px; padding: 0 20px;
+  border-radius: 8px; border: none;
+  background: #0058db; color: #fff;
+  font-size: 13px; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+  transition: background 0.12s;
+}
+
+.ndm-cal-btn-apply:hover:not(:disabled) { background: #0046b5; }
+
+.ndm-cal-btn-apply:disabled { background: #ccc; cursor: not-allowed; }

@@ -23,6 +23,19 @@ export const MOCK_SETORES = [
 ];
 
 // TODO: substituir por GET /api/usuarios — retorna usuários do órgão com nome e matrícula
+export const MOCK_PESSOAS_SETORES: Record<string, string[]> = {
+  "Ana Paula Ferreira":           ["Secretaria de Educação", "Recursos Humanos"],
+  "Beatriz Oliveira":             ["Secretaria de Saúde"],
+  "Carlos Mendes":                ["Assessoria Jurídica"],
+  "Cris Lima":                    ["Secretaria de Administração", "Tecnologia da Informação"],
+  "Fernanda Lima":                ["Planejamento Urbano"],
+  "Inácio Santos":                ["Gabinete do Prefeito"],
+  "João Pedro Alves":             ["Secretaria de Finanças", "Departamento Financeiro"],
+  "Moacir Silva de Matos Junior": ["Secretaria de Administração"],
+  "Roberto Costa":                ["Obras e Infraestrutura", "Serviços Gerais"],
+  "Samuel Desenvolvedor III":     ["Tecnologia da Informação"],
+};
+
 export const MOCK_PESSOAS = [
   "Ana Paula Ferreira", "Beatriz Oliveira", "Carlos Mendes",
   "Cris Lima", "Fernanda Lima", "Inácio Santos",

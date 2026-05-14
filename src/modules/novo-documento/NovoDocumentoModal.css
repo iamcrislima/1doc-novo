@@ -1191,3 +1191,462 @@
   background: var(--danger, #c0182d);
   color: #fff;
 }
+
+/* ── Modal de sucesso ─────────────────────────────────────── */
+.ndm-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 910;
+}
+
+.ndm-success-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+  padding: 40px 36px 32px;
+  width: 380px;
+  max-width: calc(100vw - 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  z-index: 911;
+  animation: ndmSuccessIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes ndmSuccessIn {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.92); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.ndm-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #e6f9f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 32px;
+  color: #0f6b3e;
+}
+
+.ndm-success-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 10px;
+  font-family: var(--font-sans);
+}
+
+.ndm-success-desc {
+  font-size: 14px;
+  color: #565656;
+  line-height: 1.6;
+  margin: 0 0 28px;
+  font-family: var(--font-sans);
+}
+
+.ndm-success-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.ndm-success-btn-secondary {
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 8px;
+  border: 1.5px solid #0058db;
+  background: #fff;
+  color: #0058db;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ndm-success-btn-secondary:hover {
+  background: #edf2ff;
+}
+
+.ndm-success-btn-primary {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: none;
+  background: #0058db;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.15s;
+}
+
+.ndm-success-btn-primary:hover {
+  background: #0046b5;
+}
+
+/* ── Footer checks (Urgente + Sigiloso) ──────────────────── */
+.ndm-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ndm-footer-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ndm-footer-check input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: var(--primary-pure);
+}
+
+.ndm-footer-check--sigiloso {
+  color: #7a4a00;
+}
+
+.ndm-footer-check--sigiloso:has(input:checked) {
+  color: #c06800;
+  font-weight: 600;
+}
+
+/* ── Dropdown grupos ─────────────────────────────────────── */
+.ndm-drop-group-label {
+  padding: 5px 12px 3px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary, #999);
+  border-top: 1px solid var(--border-light);
+  margin-top: 2px;
+}
+
+.ndm-drop-group-label:first-child {
+  border-top: none;
+  margin-top: 0;
+}
+
+/* ── Resultado pessoa no dropdown Para ───────────────────── */
+.ndm-pessoa-item {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.ndm-pessoa-item:last-child {
+  border-bottom: none;
+}
+
+.ndm-pessoa-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ndm-pessoa-nome {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ndm-pessoa-setores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-left: 18px;
+}
+
+.ndm-pessoa-setor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1.5px solid #0058db;
+  background: #fff;
+  color: #0058db;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.ndm-pessoa-setor-badge:hover {
+  background: #0058db;
+  color: #fff;
+}
+
+/* ── Modal de descarte ───────────────────────────────────── */
+.ndm-discard-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff0f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 28px;
+  color: #c0182d;
+}
+
+.ndm-discard-btn-confirm {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: none;
+  background: #c0182d;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.15s;
+}
+
+.ndm-discard-btn-confirm:hover {
+  background: #a01024;
+}
+
+/* ── SigiloPanel ─────────────────────────────────────────── */
+.ndm-sigilo-wrap {
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+.ndm-sigilo-wrap--open {
+  border-color: #c06800;
+  box-shadow: 0 0 0 2px rgba(192, 104, 0, 0.1);
+}
+
+.ndm-sigilo-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-surface-2, #f8f9fb);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.ndm-sigilo-toggle:hover {
+  background: #fff7ed;
+}
+
+.ndm-sigilo-wrap--open .ndm-sigilo-toggle {
+  background: #fff7ed;
+}
+
+.ndm-sigilo-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #888;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ndm-sigilo-icon--active {
+  background: #fff0d6;
+  color: #c06800;
+}
+
+.ndm-sigilo-toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.ndm-sigilo-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.ndm-sigilo-chevron {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.ndm-sigilo-body {
+  padding: 14px 14px 16px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid #f0e6d2;
+}
+
+/* Grau buttons */
+.ndm-sigilo-graus {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ndm-sigilo-grau-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-medium);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  text-align: left;
+}
+
+.ndm-sigilo-grau-btn:hover {
+  background: var(--bg-surface-2);
+  border-color: var(--border-dark);
+}
+
+.ndm-sigilo-grau-max {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 400;
+  color: #aaa;
+}
+
+.ndm-sigilo-justificativa {
+  height: 72px;
+  resize: none;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* ── SigiloPanel banner ──────────────────────────────────── */
+.ndm-sigilo-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fff8ec;
+  border: 1px solid #f5d78a;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: #7a4a00;
+  font-weight: 500;
+}
+
+.ndm-sigilo-banner-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: #c06800;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ── Para pessoas chips ──────────────────────────────────── */
+.ndm-para-row--pessoas {
+  flex-wrap: wrap;
+  min-height: 40px;
+  padding: 6px 10px;
+}
+
+.ndm-chip--pessoa {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px 4px 4px;
+  border: 1.5px solid;
+  border-radius: 100px;
+  background: transparent;
+  font-weight: 400;
+}
+
+.ndm-chip-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ndm-chip-pessoa-nome {
+  font-size: 12px;
+  font-weight: 600;
+  color: #222;
+}
+
+.ndm-chip-setor-abrev {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 100px;
+}
+
+/* ── Person avatar small (dropdown) ─────────────────────── */
+.ndm-pessoa-avatar-sm {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

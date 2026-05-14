@@ -8,6 +8,12 @@ export function useNovoDocumentoForm() {
   const [tipoDoc, setTipoDoc] = useState("Memorando");
   const [assunto, setAssunto] = useState("");
   const [urgente, setUrgente] = useState(false);
+  const [sigiloso, setSigiloso] = useState(false);
+  const [sigilosoPessoas, setSigilosoPessoas] = useState<{ nome: string; setor: string }[]>([]);
+  const [sigilosoJustificativa, setSigilosoJustificativa] = useState("");
+  const [sigilosoPrazo, setSigilosoPrazo] = useState("");
+  const [sigilosoSetorTermino, setSigilosoSetorTermino] = useState<string[]>([]);
+  const [sigilosoSetorSucessor, setSigilosoSetorSucessor] = useState<string[]>([]);
 
   // Para chips (Memorando / Ofício / Ciclo de vida)
   const [paraChips, setParaChips] = useState<string[]>([]);
@@ -147,6 +153,8 @@ export function useNovoDocumentoForm() {
   const resetForm = () => {
     setTipoDoc("Memorando");
     setAssunto(""); setUrgente(false);
+    setSigiloso(false); setSigilosoPessoas([]); setSigilosoJustificativa("");
+    setSigilosoPrazo(""); setSigilosoSetorTermino([]); setSigilosoSetorSucessor([]);
     setParaChips([]); setParaInput("");
     setShowCC(false); setCcChips([]); setCcInput(""); setShowCcSuggestions(false); setCcListaSelecionada("");
     setShowCuidados(false); setCuidadosChips([]); setCuidadosInput("");
@@ -196,6 +204,12 @@ export function useNovoDocumentoForm() {
     tipoDoc, setTipoDoc,
     assunto, setAssunto,
     urgente, setUrgente,
+    sigiloso, setSigiloso,
+    sigilosoPessoas, setSigilosoPessoas,
+    sigilosoJustificativa, setSigilosoJustificativa,
+    sigilosoPrazo, setSigilosoPrazo,
+    sigilosoSetorTermino, setSigilosoSetorTermino,
+    sigilosoSetorSucessor, setSigilosoSetorSucessor,
     paraChips, setParaChips,
     paraInput, setParaInput,
     showCC, setShowCC,
