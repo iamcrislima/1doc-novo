@@ -5,7 +5,7 @@ export function useNovoDocumentoForm() {
   const [mode, setMode] = useState<ModalMode>("normal");
 
   // ── form state ─────────────────────────────────────────────
-  const [tipoDoc, setTipoDoc] = useState("Memorando");
+  const [tipoDoc, setTipoDoc] = useState("Análise de Projeto");
   const [assunto, setAssunto] = useState("");
   const [urgente, setUrgente] = useState(false);
   const [sigiloso, setSigiloso] = useState(false);
@@ -151,7 +151,7 @@ export function useNovoDocumentoForm() {
   const [arquivos, setArquivos] = useState<ArquivoItem[]>([]);
 
   const resetForm = () => {
-    setTipoDoc("Memorando");
+    setTipoDoc("Análise de Projeto");
     setAssunto(""); setUrgente(false);
     setSigiloso(false); setSigilosoPessoas([]); setSigilosoJustificativa("");
     setSigilosoPrazo(""); setSigilosoSetorTermino([]); setSigilosoSetorSucessor([]);

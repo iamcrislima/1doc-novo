@@ -1,9 +1,11 @@
 export const TIPOS_DOC = [
-  "Memorando", "Documento", "Ata", "Circular", "Ciclo de vida",
-  "Ofício", "Ofício Manual", "Alvará", "Ouvidoria", "Chamado técnico",
-  "Sessão Plenária", "Protocolo", "Análise de Projeto", "Fiscalização",
-  "Proc. Administrativo", "Ato oficial", "Entrada de dados", "Parecer",
-  "Matéria Legislativa", "Processo judicial",
+  "Análise de Projeto", "Ata", "Ato oficial", "Alvará",
+  "Chamado técnico", "Ciclo de vida", "Circular",
+  "Documento", "Entrada de dados", "Fiscalização",
+  "Matéria Legislativa", "Memorando",
+  "Ofício", "Ofício Manual", "Ouvidoria",
+  "Parecer", "Proc. Administrativo", "Processo judicial",
+  "Protocolo", "Sessão Plenária",
 ];
 
 export const TIPOS_DOCUMENTO_SUB = [
