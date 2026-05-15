@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import "./CentralDeAcoes.css";
 
 const COUNTERS = [
@@ -73,6 +74,7 @@ const CIRCULARES = [
 ];
 
 export default function CentralDeAcoes() {
+  const navigate = useNavigate();
   return (
     <div className="cda">
       {/* Welcome + KPIs */}
@@ -153,7 +155,7 @@ export default function CentralDeAcoes() {
             </div>
             <div className="cda__col-items">
               {col.items.map((item, idx) => (
-                <div key={`${col.id}-${idx}`} className="cda__item">
+                <div key={`${col.id}-${idx}`} className="cda__item" onClick={() => navigate('/emissao')} style={{ cursor: 'pointer' }}>
                   <div className="cda__item-title">{item.title}</div>
                   <div className="cda__item-desc">{item.desc}</div>
                   <div className="cda__item-date">{item.date}</div>
