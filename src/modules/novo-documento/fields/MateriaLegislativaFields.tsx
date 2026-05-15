@@ -1,6 +1,7 @@
 import { useNovoDocumentoCtx } from "../context";
-import { TIPOS_MATERIA, MOCK_SETORES, DOCS_ORIGEM, ATEND_PRIORITARIO_OPTS } from "../constants";
+import { TIPOS_MATERIA, DOCS_ORIGEM, ATEND_PRIORITARIO_OPTS } from "../constants";
 import { SimpleSelect } from "../components/SimpleSelect";
+import { ParaComBusca } from "../components/ParaComBusca";
 import { EditorBlock } from "../components/EditorBlock";
 import { AnexosSection } from "../components/AnexosSection";
 import { PrazoSection } from "../components/PrazoSection";
@@ -10,7 +11,6 @@ export function MateriaLegislativaFields() {
   const {
     ementa, setEmenta,
     tipoMateria, setTipoMateria,
-    paraSetorProtocolo, setParaSetorProtocolo,
     docOrigem, setDocOrigem,
     docOrigemNum, setDocOrigemNum,
     atendPrioritario, setAtendPrioritario,
@@ -32,10 +32,7 @@ export function MateriaLegislativaFields() {
         <label className="ndm-label">Tipo de Matéria*</label>
         <SimpleSelect value={tipoMateria} onChange={setTipoMateria} options={TIPOS_MATERIA} placeholder="- selecione -" />
       </div>
-      <div className="ndm-field">
-        <label className="ndm-label">Para*</label>
-        <SimpleSelect value={paraSetorProtocolo} onChange={setParaSetorProtocolo} options={MOCK_SETORES} placeholder="- selecione setor -" />
-      </div>
+      <ParaComBusca label="Para*" />
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Documento de Origem</label>

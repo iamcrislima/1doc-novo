@@ -1,7 +1,7 @@
 import { useNovoDocumentoCtx } from "../context";
-import { ASSUNTOS_OUVIDORIA, MOCK_SETORES, PRIORIDADES, ATEND_PRIORITARIO_OPTS } from "../constants";
+import { ASSUNTOS_OUVIDORIA, PRIORIDADES, ATEND_PRIORITARIO_OPTS } from "../constants";
 import { SimpleSelect } from "../components/SimpleSelect";
-import { CcPanel } from "../components/CcPanel";
+import { ParaComBusca } from "../components/ParaComBusca";
 import { EditorBlock } from "../components/EditorBlock";
 import { AnexosSection } from "../components/AnexosSection";
 import { PrazoSection } from "../components/PrazoSection";
@@ -12,8 +12,6 @@ export function OuvidoriaFields() {
     identificacao, setIdentificacao,
     solicitante, setSolicitante,
     assuntoValue, setAssuntoValue,
-    paraSetorOuv, setParaSetorOuv,
-    showCC, setShowCC,
     prioridade, setPrioridade,
     atendPrioritario, setAtendPrioritario,
     dataOcorrencia, setDataOcorrencia,
@@ -58,17 +56,7 @@ export function OuvidoriaFields() {
         <label className="ndm-label">Assunto*</label>
         <SimpleSelect value={assuntoValue} onChange={setAssuntoValue} options={ASSUNTOS_OUVIDORIA} placeholder="Selecione o assunto..." />
       </div>
-      <div className="ndm-field">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
-          <label className="ndm-label" style={{ margin: 0 }}>Para*</label>
-          <div style={{ display: "flex", gap: 14 }}>
-            <button className="ndm-add-btn" style={{ fontSize: 12 }}>Lista de envio</button>
-            {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
-          </div>
-        </div>
-        <SimpleSelect value={paraSetorOuv} onChange={setParaSetorOuv} options={MOCK_SETORES} placeholder="- selecione setor -" />
-      </div>
-      <CcPanel />
+      <ParaComBusca label="Para*" />
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Prioridade</label>

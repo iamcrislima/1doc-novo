@@ -74,8 +74,12 @@ export default function Header({ onNovoClick }: HeaderProps) {
             Inbox <i className="fa-solid fa-chevron-down" style={{ fontSize: 10 }} />
             {openMenu === "inbox" && (
               <div className="onb-header__dropdown">
-                <div className="onb-header__dropdown-item">Inbox de SADM</div>
-                <div className="onb-header__dropdown-item">Inbox pessoal</div>
+                <div className="onb-header__dropdown-item" onClick={(e) => { e.stopPropagation(); navigate('/inbox'); setOpenMenu(null); }}>
+                  Inbox de SADM
+                </div>
+                <div className="onb-header__dropdown-item" onClick={(e) => { e.stopPropagation(); navigate('/inbox'); setOpenMenu(null); }}>
+                  Inbox pessoal
+                </div>
               </div>
             )}
           </span>
