@@ -1,14 +1,29 @@
 import { useState } from 'react';
 import IdentidadeSection from './IdentidadeSection';
 import SetoresTab from './SetoresTab';
+import CargosEFuncoesTab from './CargosEFuncoesTab';
+import GestaoUsuariosTab from './GestaoUsuariosTab';
+import MarcadoresTab from './MarcadoresTab';
+import TiposDocumentosTab from './TiposDocumentosTab';
+import AssuntosTab from './AssuntosTab';
+import ModelosDocumentosTab from './ModelosDocumentosTab';
+import ListasAssinantesTab from './ListasAssinantesTab';
+import CartaServicosTab from './CartaServicosTab';
+import CarimbosDigitaisTab from './CarimbosDigitaisTab';
+import {
+  ConfiguracaoTab, ServicosTab, CategoriasTab, PerfisTab,
+  OrgaosTab, SistemasTab, PoliticaTab,
+} from './CentralAtendimentoTab';
 
 /* ── tipos ─────────────────────────────────────────────────────────── */
 
 type SectionId =
   | 'identidade' | 'setores' | 'cargos-funcoes' | 'carimbos-digitais'
-  | 'assuntos' | 'tipos' | 'modelos' | 'listas-assinantes' | 'listas-envio' | 'carta-servico'
-  | 'usuarios' | 'papeis'
-  | 'central-atendimento';
+  | 'assuntos' | 'tipos-documentos' | 'modelos-documentos' | 'marcadores'
+  | 'fluxo-assinaturas' | 'carta-servicos'
+  | 'gestao-usuarios' | 'perfis-acesso'
+  | 'ca-config' | 'ca-servicos' | 'ca-categorias' | 'ca-perfis'
+  | 'ca-orgaos' | 'ca-sistemas' | 'ca-politica';
 
 interface NavItem { id: SectionId; label: string }
 interface NavGroup { id: string; label: string; icon: string; items: NavItem[] }
@@ -26,30 +41,34 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'documentos', label: 'Documentos e processos', icon: 'fa-regular fa-folder-tree',
     items: [
-      { id: 'assuntos',          label: 'Assuntos' },
-      { id: 'tipos',             label: 'Tipos' },
-      { id: 'modelos',           label: 'Modelos' },
-      { id: 'listas-assinantes', label: 'Listas de assinantes' },
-      { id: 'listas-envio',      label: 'Listas de envio' },
-      { id: 'carta-servico',     label: 'Carta de serviço' },
+      { id: 'assuntos',           label: 'Assuntos' },
+      { id: 'tipos-documentos',   label: 'Tipos de documentos' },
+      { id: 'modelos-documentos', label: 'Modelos de documentos' },
+      { id: 'marcadores',         label: 'Marcadores' },
+      { id: 'fluxo-assinaturas',  label: 'Fluxo de Assinaturas' },
+      { id: 'carta-servicos',     label: 'Carta de serviços' },
     ],
   },
   {
     id: 'usuarios', label: 'Usuários e permissões', icon: 'fa-regular fa-user-shield',
     items: [
-      { id: 'usuarios', label: 'Usuários' },
-      { id: 'papeis',   label: 'Papéis' },
+      { id: 'gestao-usuarios', label: 'Gestão de usuários' },
+      { id: 'perfis-acesso',   label: 'Perfis de acesso' },
     ],
   },
   {
     id: 'atendimento', label: 'Central de atendimento', icon: 'fa-regular fa-headset',
-    items: [{ id: 'central-atendimento', label: 'Central de atendimento' }],
+    items: [
+      { id: 'ca-config',     label: 'Configuração'           },
+      { id: 'ca-servicos',   label: 'Serviços'               },
+      { id: 'ca-categorias', label: 'Categorias'             },
+      { id: 'ca-perfis',     label: 'Perfis'                 },
+      { id: 'ca-orgaos',     label: 'Órgãos Responsáveis'   },
+      { id: 'ca-sistemas',   label: 'Sistemas Integrados'   },
+      { id: 'ca-politica',   label: 'Política de privacidade'},
+    ],
   },
 ];
-
-const SUBTITLES: Partial<Record<SectionId, string>> = {
-  identidade: 'Gerencie nome, brasão, logotipo e demais informações institucionais.',
-};
 
 function PlaceholderSection({ label }: { label: string }) {
   return (
@@ -63,7 +82,7 @@ function PlaceholderSection({ label }: { label: string }) {
 }
 
 export default function Administrativo() {
-  const [active, setActive]       = useState<SectionId>('identidade');
+  const [active, setActive]         = useState<SectionId>('identidade');
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(['institucional']));
 
   const toggleGroup = (id: string) => {
@@ -74,7 +93,63 @@ export default function Administrativo() {
     });
   };
 
+  const navigate = (id: SectionId) => {
+    setActive(id);
+    const group = NAV_GROUPS.find((g) => g.items.some((i) => i.id === id));
+    if (group) setOpenGroups((prev) => new Set([...prev, group.id]));
+  };
+
   const activeItem = NAV_GROUPS.flatMap((g) => g.items).find((i) => i.id === active);
+
+  const renderContent = () => {
+    switch (active) {
+      case 'identidade':
+        return (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: '#353535', lineHeight: 1.2 }}>
+                Identidade
+              </p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: '#565656', lineHeight: 1.5 }}>
+                Gerencie nome, brasão, logotipo e demais informações institucionais.
+              </p>
+            </div>
+            <IdentidadeSection />
+          </>
+        );
+      case 'setores':          return <SetoresTab />;
+      case 'cargos-funcoes':   return <CargosEFuncoesTab />;
+      case 'assuntos':          return <AssuntosTab />;
+      case 'tipos-documentos': return <TiposDocumentosTab />;
+      case 'marcadores':       return <MarcadoresTab />;
+      case 'gestao-usuarios':       return <GestaoUsuariosTab />;
+      case 'modelos-documentos':    return <ModelosDocumentosTab />;
+      case 'fluxo-assinaturas':     return <ListasAssinantesTab />;
+      case 'carta-servicos':        return <CartaServicosTab />;
+      case 'carimbos-digitais':     return <CarimbosDigitaisTab />;
+      case 'ca-config':     return <ConfiguracaoTab />;
+      case 'ca-servicos':   return <ServicosTab />;
+      case 'ca-categorias': return <CategoriasTab />;
+      case 'ca-perfis':     return <PerfisTab />;
+      case 'ca-orgaos':     return <OrgaosTab />;
+      case 'ca-sistemas':   return <SistemasTab />;
+      case 'ca-politica':   return <PoliticaTab />;
+      default:
+        return (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: '#353535', lineHeight: 1.2 }}>
+                {activeItem?.label ?? ''}
+              </p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: '#565656', lineHeight: 1.5 }}>
+                Esta seção está em desenvolvimento.
+              </p>
+            </div>
+            <PlaceholderSection label={activeItem?.label ?? ''} />
+          </>
+        );
+    }
+  };
 
   return (
     <div style={{
@@ -100,7 +175,6 @@ export default function Administrativo() {
 
             return (
               <div key={group.id} style={{ width: 248 }}>
-                {/* Cabeçalho do grupo */}
                 <button
                   onClick={() => toggleGroup(group.id)}
                   style={{
@@ -130,7 +204,6 @@ export default function Administrativo() {
                   />
                 </button>
 
-                {/* Sub-itens */}
                 {isOpen && (
                   <div style={{ padding: '4px 20px 4px' }}>
                     <div style={{
@@ -141,14 +214,16 @@ export default function Administrativo() {
                       {group.items.map((item) => (
                         <button
                           key={item.id}
-                          onClick={() => setActive(item.id)}
+                          onClick={() => navigate(item.id)}
                           style={{
                             display: 'block', width: '100%', textAlign: 'left',
                             padding: '8px 12px',
-                            background: 'none', border: 'none', cursor: 'pointer',
+                            background: active === item.id ? '#edf2ff' : 'none',
+                            border: 'none', cursor: 'pointer',
                             fontSize: 12,
                             fontWeight: active === item.id ? 700 : 600,
-                            color: '#565656',
+                            color: active === item.id ? '#0058db' : '#565656',
+                            borderRadius: 6,
                             fontFamily: 'Open Sans, sans-serif',
                           }}
                         >
@@ -166,64 +241,11 @@ export default function Administrativo() {
         {/* Painel de conteúdo */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 12px 12px' }}>
           <div style={{ background: 'white', borderRadius: 8, padding: '16px 16px 24px', minHeight: '100%' }}>
-            {active === 'identidade' && (
-              <>
-                <div style={{ marginBottom: 16 }}>
-                  <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: '#353535', lineHeight: 1.2 }}>
-                    {activeItem?.label ?? ''}
-                  </p>
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: '#565656', lineHeight: 1.5 }}>
-                    {SUBTITLES[active] ?? ''}
-                  </p>
-                </div>
-                <IdentidadeSection />
-              </>
-            )}
-            {active === 'setores' && <SetoresTab />}
-            {active !== 'identidade' && active !== 'setores' && (
-              <>
-                <div style={{ marginBottom: 16 }}>
-                  <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: '#353535', lineHeight: 1.2 }}>
-                    {activeItem?.label ?? ''}
-                  </p>
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: '#565656', lineHeight: 1.5 }}>
-                    Esta seção está em desenvolvimento.
-                  </p>
-                </div>
-                <PlaceholderSection label={activeItem?.label ?? ''} />
-              </>
-            )}
+            {renderContent()}
           </div>
         </div>
       </div>
 
-      {/* ── Footer sticky (full width) ─────────────────────── */}
-      <div style={{
-        flexShrink: 0, height: 72,
-        background: 'white',
-        boxShadow: '0px -8px 8px rgba(0,0,0,0.08)',
-        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-        gap: 16, padding: '0 24px',
-      }}>
-        <button style={{
-          height: 40, padding: '0 16px',
-          border: '1px solid #b2132e', borderRadius: 8,
-          background: 'white', color: '#b2132e',
-          fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          fontFamily: 'Open Sans, sans-serif',
-        }}>
-          Cancelar
-        </button>
-        <button style={{
-          height: 40, padding: '0 16px',
-          border: 'none', borderRadius: 8,
-          background: '#0058db', color: 'white',
-          fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          fontFamily: 'Open Sans, sans-serif',
-        }}>
-          Salvar e continuar
-        </button>
-      </div>
     </div>
   );
 }

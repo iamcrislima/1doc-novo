@@ -1,7 +1,7 @@
 import { useNovoDocumentoCtx } from "../context";
-import { ASSUNTOS_PROTOCOLO, MOCK_SETORES, ENTRADA_TIPOS, ATEND_PRIORITARIO_OPTS } from "../constants";
+import { ASSUNTOS_PROTOCOLO, ENTRADA_TIPOS, ATEND_PRIORITARIO_OPTS } from "../constants";
 import { SimpleSelect } from "../components/SimpleSelect";
-import { CcPanel } from "../components/CcPanel";
+import { ParaComBusca } from "../components/ParaComBusca";
 import { EditorBlock } from "../components/EditorBlock";
 import { AnexosSection } from "../components/AnexosSection";
 import { PrazoSection } from "../components/PrazoSection";
@@ -13,8 +13,6 @@ export function ProtocoloFields() {
     sigiloso, tipoDoc,
     solicitante, setSolicitante,
     assuntoProtocolo, setAssuntoProtocolo,
-    paraSetorProtocolo, setParaSetorProtocolo,
-    showCC, setShowCC,
     entradaTipo, setEntradaTipo,
     atendPrioritario, setAtendPrioritario,
     acompanhaFisico, setAcompanhaFisico,
@@ -36,21 +34,7 @@ export function ProtocoloFields() {
         <SimpleSelect value={assuntoProtocolo} onChange={setAssuntoProtocolo} options={ASSUNTOS_PROTOCOLO} placeholder="Selecione ou pesquise o assunto..." />
       </div>
       {tipoDoc === "Protocolo" && <SigiloPanel />}
-      {(!sigiloso || tipoDoc !== "Protocolo") && (
-        <>
-          <div className="ndm-field">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
-              <label className="ndm-label" style={{ margin: 0 }}>Para*</label>
-              <div style={{ display: "flex", gap: 14 }}>
-                <button className="ndm-add-btn" style={{ fontSize: 12 }}>Lista de envio</button>
-                {!showCC && <button className="ndm-add-btn" style={{ fontSize: 12 }} onClick={() => setShowCC(true)}>+ CC</button>}
-              </div>
-            </div>
-            <SimpleSelect value={paraSetorProtocolo} onChange={setParaSetorProtocolo} options={MOCK_SETORES} placeholder="- selecione setor -" />
-          </div>
-          <CcPanel />
-        </>
-      )}
+      {(!sigiloso || tipoDoc !== "Protocolo") && <ParaComBusca label="Para*" />}
       <div className="ndm-row-2">
         <div className="ndm-field">
           <label className="ndm-label">Entrada*</label>

@@ -1,6 +1,7 @@
 import { useNovoDocumentoCtx } from "../context";
-import { FISCALIZACAO_TIPOS, MOCK_SETORES } from "../constants";
+import { FISCALIZACAO_TIPOS } from "../constants";
 import { SimpleSelect } from "../components/SimpleSelect";
+import { ParaComBusca } from "../components/ParaComBusca";
 import { EditorBlock } from "../components/EditorBlock";
 import { AnexosSection } from "../components/AnexosSection";
 import { PrazoSection } from "../components/PrazoSection";
@@ -10,7 +11,6 @@ export function FiscalizacaoFields() {
   const {
     fiscalizado, setFiscalizado,
     fiscalizacaoTipo, setFiscalizacaoTipo,
-    fiscalizacaoPara, setFiscalizacaoPara,
     acompanhaFisico, setAcompanhaFisico,
   } = useNovoDocumentoCtx();
 
@@ -29,10 +29,7 @@ export function FiscalizacaoFields() {
         <label className="ndm-label">Tipo*</label>
         <SimpleSelect value={fiscalizacaoTipo} onChange={setFiscalizacaoTipo} options={FISCALIZACAO_TIPOS} placeholder="- selecione -" />
       </div>
-      <div className="ndm-field">
-        <label className="ndm-label">Para*</label>
-        <SimpleSelect value={fiscalizacaoPara} onChange={setFiscalizacaoPara} options={MOCK_SETORES} placeholder="- selecione setor -" />
-      </div>
+      <ParaComBusca label="Para*" />
       <EditorBlock />
       <div className="ndm-field">
         <label className="ndm-checkbox-row">
