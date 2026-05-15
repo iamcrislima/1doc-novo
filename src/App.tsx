@@ -5,6 +5,7 @@ import Subheader from './components/layout/Subheader'
 import CentralDeAcoes from './pages/CentralDeAcoes'
 import Administrativo from './pages/Administrativo'
 import InboxPage from './pages/Inbox'
+import Emissao from './pages/Emissao'
 import NovoDocumentoModal from './components/modals/NovoDocumentoModal'
 import './App.css'
 
@@ -34,6 +35,7 @@ function AppLayout({ onNovoClick }: { onNovoClick: () => void }) {
     if (location.pathname === '/configuracoes')    return [root, { label: 'Configurações' }]
     if (location.pathname.startsWith('/inbox'))          return [{ label: 'Inbox', to: '/inbox' }, { label: 'Em aberto' }]
     if (location.pathname.startsWith('/administrativo')) return [root, { label: 'Administrativo' }]
+    if (location.pathname.startsWith('/emissao')) return [root, { label: 'Emissão', to: '/emissao' }]
     return [{ label: 'Central de Ações' }]
   })()
 
@@ -55,6 +57,7 @@ function AppLayout({ onNovoClick }: { onNovoClick: () => void }) {
             <Route path="/configuracoes"    element={<PlaceholderPage title="Configurações" />} />
             <Route path="/inbox"            element={<InboxPage />} />
             <Route path="/administrativo"  element={<Administrativo />} />
+            <Route path="/emissao"         element={<Emissao />} />
           </Routes>
         </div>
       </div>

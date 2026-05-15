@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Inbox.css';
 
 /* ── Types ─────────────────────────────────────────────────────── */
@@ -686,6 +687,7 @@ function CardRow({
   onArchive: () => void;
   onRemoveTag: (tag: string) => void;
 }) {
+  const navigate = useNavigate();
   const cardClass = [
     'ibx-card',
     selected ? 'ibx-card--selected' : '',
@@ -693,7 +695,7 @@ function CardRow({
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={cardClass}>
+    <div className={cardClass} onClick={() => navigate('/emissao')} style={{ cursor: 'pointer' }}>
       {/* Marcadores: pill badges at top */}
       {item.marcadores.length > 0 && (
         <div className="ibx-card__marcadores">
@@ -709,8 +711,8 @@ function CardRow({
       <div className="ibx-grid ibx-card__grid">
         {/* Col 1: Check + Star */}
         <div className="ibx-card__cell ibx-card__cell--check">
-          <input type="checkbox" className="ibx-checkbox" checked={selected} onChange={onToggle} />
-          <button className={`ibx-star${item.isFavorite ? ' ibx-star--on' : ''}`} onClick={onToggleFav}>
+          <input type="checkbox" className="ibx-checkbox" checked={selected} onChange={onToggle} onClick={e => e.stopPropagation()} />
+          <button className={`ibx-star${item.isFavorite ? ' ibx-star--on' : ''}`} onClick={e => { e.stopPropagation(); onToggleFav(); }}>
             <i className={item.isFavorite ? 'fa-solid fa-star' : 'fa-regular fa-star'} />
           </button>
         </div>
